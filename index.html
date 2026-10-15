@@ -1,1 +1,186 @@
 
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="description" content="Absensi mahasiswa AM di SMP Negeri 6 Singaraja">
+  <title>Absensi Mahasiswa AM</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">AM</div>
+        <div>
+          <h1>Absensi Mahasiswa AM</h1>
+          <p>SMP Negeri 6 Singaraja</p>
+        </div>
+      </div>
+      <a class="admin-link" href="admin.html">Admin</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="welcome">
+      <span class="eyebrow">PRESENSI MAHASISWA</span>
+      <h2>Selamat datang!</h2>
+      <p>Isi identitas, aktifkan lokasi, dan unggah foto untuk melakukan absensi.</p>
+    </section>
+
+    <section class="attendance-card">
+      <div class="card-heading">
+        <div>
+          <h2>Formulir Absensi</h2>
+          <p>Pastikan informasi yang kamu masukkan sudah benar.</p>
+        </div>
+        <span class="status-badge">GPS wajib</span>
+      </div>
+
+      <form id="attendanceForm">
+        <div class="form-group">
+          <label for="fullName">Nama lengkap</label>
+          <input
+            type="text"
+            id="fullName"
+            name="full_name"
+            placeholder="Masukkan nama lengkap"
+            minlength="2"
+            maxlength="100"
+            autocomplete="name"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="nim">NIM</label>
+          <input
+            type="text"
+            id="nim"
+            name="nim"
+            placeholder="Masukkan NIM"
+            inputmode="numeric"
+            pattern="[0-9]{3,30}"
+            minlength="3"
+            maxlength="30"
+            required
+          >
+          <small>Gunakan NIM berupa angka tanpa spasi.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="session">Sesi kegiatan</label>
+          <select id="session" name="session" required>
+            <option value="">Pilih sesi</option>
+            <option value="Pagi">Pagi</option>
+            <option value="Siang">Siang</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Jenis absensi</label>
+          <div class="attendance-options">
+            <label class="attendance-option">
+              <input
+                type="radio"
+                name="attendance_type"
+                value="Datang"
+                required
+              >
+              <span class="option-icon" aria-hidden="true">☀️</span>
+              <span>
+                <strong>Absen Datang</strong>
+                <small>Catat waktu kedatangan</small>
+              </span>
+            </label>
+
+            <label class="attendance-option">
+              <input
+                type="radio"
+                name="attendance_type"
+                value="Pulang"
+                required
+              >
+              <span class="option-icon" aria-hidden="true">🏁</span>
+              <span>
+                <strong>Absen Pulang</strong>
+                <small>Catat waktu kepulangan</small>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="photo">Foto absensi</label>
+          <input
+            type="file"
+            id="photo"
+            name="photo"
+            accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+            capture="environment"
+            required
+          >
+          <small>
+            Kamu dapat memilih foto dari galeri atau mengambil foto baru.
+            Foto akan diproses sebelum dikirim.
+          </small>
+          <div id="photoPreview" class="photo-preview" hidden>
+            <img id="previewImage" alt="Pratinjau foto absensi">
+            <button type="button" id="removePhoto" class="text-button">
+              Hapus foto
+            </button>
+          </div>
+        </div>
+
+        <div class="location-panel">
+          <div class="location-icon" aria-hidden="true">📍</div>
+          <div class="location-content">
+            <strong>Lokasi perangkat</strong>
+            <p id="locationStatus" aria-live="polite">
+              Lokasi belum diperiksa. Tekan tombol di bawah.
+            </p>
+            <button type="button" id="checkLocation" class="secondary-button">
+              Periksa Lokasi GPS
+            </button>
+          </div>
+        </div>
+
+        <div class="location-note">
+          Absensi hanya dapat dikirim jika jarak dari titik sekolah maksimal
+          150 meter dan akurasi GPS maksimal 100 meter.
+        </div>
+
+        <div id="formMessage" class="message" role="status" aria-live="polite" hidden></div>
+
+        <button type="submit" id="submitButton" class="primary-button">
+          Kirim Absensi
+        </button>
+
+        <p class="privacy-note">
+          Data absensi digunakan untuk keperluan administrasi kegiatan.
+          Jangan mengirim absensi atas nama orang lain.
+        </p>
+      </form>
+    </section>
+
+    <section class="help-card">
+      <h2>Kesulitan melakukan absensi?</h2>
+      <ul>
+        <li>Aktifkan layanan lokasi pada perangkat.</li>
+        <li>Izinkan browser mengakses lokasi dan pilih akurasi lokasi presisi.</li>
+        <li>Pastikan kamu berada di area sekolah.</li>
+        <li>Gunakan koneksi internet yang stabil.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Absensi Mahasiswa AM · SMP Negeri 6 Singaraja</p>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
