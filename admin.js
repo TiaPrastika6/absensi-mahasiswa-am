@@ -14,6 +14,7 @@
   const dashboardMessage = document.getElementById("dashboardMessage");
   const filterDate = document.getElementById("filterDate");
   const filterSession = document.getElementById("filterSession");
+  const filterType = document.getElementById("filterType");
   const filterProgram = document.getElementById("filterProgram");
   const loadButton = document.getElementById("loadButton");
   const exportButton = document.getElementById("exportButton");
@@ -157,6 +158,7 @@
 
       if (filterDate.value) params.set("date", filterDate.value);
       if (filterSession.value) params.set("session", filterSession.value);
+      if (filterType.value) params.set("attendance_type", filterType.value);
       if (filterProgram.value) {
         params.set("study_program", filterProgram.value);
       }
