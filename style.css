@@ -15,9 +15,9 @@
 }
 
 /* Reset dan dasar */
+
 *,
 *::before,
-
 *::after {
   box-sizing: border-box;
 }
@@ -31,21 +31,21 @@ body {
   background: var(--background);
   color: var(--text);
   font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Arial, sans-serif;
+  Roboto, Arial, sans-serif;
   font-size: 15px;
   line-height: 1.6;
 }
+
 button,
 input,
 select,
-
 textarea {
   font: inherit;
 }
+
 button,
 a,
 input,
-
 select {
   -webkit-tap-highlight-color: transparent;
 }
@@ -164,9 +164,9 @@ button:disabled {
   color: var(--muted);
   font-size: 14px;
 }
+
 .attendance-card,
 .help-card,
-
 .schedule-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -185,9 +185,9 @@ button:disabled {
   gap: 14px;
   margin-bottom: 22px;
 }
+
 .card-heading h2,
 .help-card h2,
-
 .schedule-card h2 {
   margin: 0;
   font-size: 18px;
@@ -220,12 +220,12 @@ button:disabled {
   font-size: 13px;
   font-weight: 650;
 }
+
 input[type="text"],
 input[type="date"],
 input[type="number"],
 input[type="search"],
 select,
-
 textarea {
   width: 100%;
   min-height: 44px;
@@ -237,18 +237,18 @@ textarea {
   color: var(--text);
   font-size: 14px;
 }
+
 input[type="text"]:focus,
 input[type="date"]:focus,
 input[type="number"]:focus,
 input[type="search"]:focus,
 select:focus,
-
 textarea:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(36, 91, 143, 0.11);
 }
-input::placeholder,
 
+input::placeholder,
 textarea::placeholder {
   color: #8a99a5;
 }
@@ -332,8 +332,8 @@ input[type="file"]::file-selector-button:hover {
 .option-icon {
   font-size: 18px;
 }
-.attendance-option strong,
 
+.attendance-option strong,
 .attendance-option small {
   display: block;
 }
@@ -494,8 +494,8 @@ input[type="file"]::file-selector-button:hover {
 .primary-button:active {
   transform: none;
 }
-.primary-button:disabled,
 
+.primary-button:disabled,
 .secondary-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -509,28 +509,28 @@ input[type="file"]::file-selector-button:hover {
 }
 
 /* Bantuan dan pemberitahuan jadwal */
-.help-card,
 
+.help-card,
 .schedule-card {
   margin-top: 18px;
   padding: 20px;
   box-shadow: none;
 }
-.help-card h2,
 
+.help-card h2,
 .schedule-card h2 {
   font-size: 15px;
 }
-.help-card ul,
 
+.help-card ul,
 .schedule-card ul {
   margin: 10px 0 0;
   padding-left: 19px;
   color: var(--muted);
   font-size: 13px;
 }
-.help-card li + li,
 
+.help-card li + li,
 .schedule-card li + li {
   margin-top: 6px;
 }
@@ -547,10 +547,9 @@ input[type="file"]::file-selector-button:hover {
 }
 
 /* =========================================================
-   HALAMAN ADMIN
-   Mengikuti class admin-container, admin-panel, admin-form
-   ========================================================= */
-
+HALAMAN ADMIN
+Mengikuti class admin-container, admin-panel, admin-form
+========================================================= */
 .admin-container {
   width: min(calc(100% - 32px), 1100px);
   margin: 24px auto 40px;
@@ -588,8 +587,8 @@ input[type="file"]::file-selector-button:hover {
   font-size: 13px;
   font-weight: 600;
 }
-.admin-form input,
 
+.admin-form input,
 .admin-form select {
   width: 100%;
   min-height: 42px;
@@ -600,8 +599,8 @@ input[type="file"]::file-selector-button:hover {
   color: var(--text);
   font-size: 13px;
 }
-.admin-form input:focus,
 
+.admin-form input:focus,
 .admin-form select:focus {
   outline: none;
   border-color: var(--primary);
@@ -609,23 +608,23 @@ input[type="file"]::file-selector-button:hover {
 }
 
 /* Tombol admin — class khusus bila tersedia */
+
 .admin-panel .primary-button,
 .admin-panel button[type="submit"],
-
 .admin-panel .btn-primary {
   background: var(--primary);
   color: #fff;
   border: 1px solid var(--primary);
 }
+
 .admin-panel .primary-button:hover,
 .admin-panel button[type="submit"]:hover,
-
 .admin-panel .btn-primary:hover {
   background: var(--primary-dark);
 }
+
 .admin-panel .secondary-button,
 .admin-panel .btn-secondary,
-
 .admin-panel .admin-link {
   background: var(--primary-light);
   color: var(--primary-dark);
@@ -633,8 +632,8 @@ input[type="file"]::file-selector-button:hover {
 }
 
 /* Gaya dasar tombol admin agar seragam */
-.admin-panel button,
 
+.admin-panel button,
 .admin-panel .btn {
   min-height: 38px;
   padding: 8px 13px;
@@ -722,8 +721,8 @@ input[type="file"]::file-selector-button:hover {
   font-size: 12px;
   font-weight: 600;
 }
-.filter-grid input,
 
+.filter-grid input,
 .filter-grid select {
   width: 100%;
   min-height: 43px;
@@ -735,8 +734,8 @@ input[type="file"]::file-selector-button:hover {
   font: inherit;
   font-size: 13px;
 }
-.filter-grid input:focus,
 
+.filter-grid input:focus,
 .filter-grid select:focus {
   outline: none;
   border-color: var(--primary);
@@ -826,8 +825,8 @@ input[type="file"]::file-selector-button:hover {
   white-space: nowrap;
   font-size: 12px;
 }
-.attendance-table th,
 
+.attendance-table th,
 .attendance-table td {
   padding: 11px 10px;
   text-align: left;
@@ -880,18 +879,18 @@ input[type="file"]::file-selector-button:hover {
 }
 
 /* Perbaikan input tanggal dan kontrol form di Safari iPhone */
-.admin-panel,
 
+.admin-panel,
 .admin-panel * {
   box-sizing: border-box;
 }
-.filter-grid > div,
 
+.filter-grid > div,
 .filter-grid > label {
   min-width: 0;
 }
 
-#filterDate,
+\#filterDate,
 .filter-grid input[type="date"] {
   display: block;
   width: 100%;
@@ -900,20 +899,17 @@ input[type="file"]::file-selector-button:hover {
   height: 48px;
   padding: 8px 12px;
   box-sizing: border-box;
-
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 16px;
   color: #263746;
   background-color: #ffffff;
-
   border: 1px solid #d7e0e8;
   border-radius: 8px;
-
   -webkit-appearance: auto;
   appearance: auto;
 }
 
-#filterDate::-webkit-date-and-time-value,
+\#filterDate::-webkit-date-and-time-value,
 .filter-grid input[type="date"]::-webkit-date-and-time-value {
   text-align: left;
 }
@@ -925,4 +921,91 @@ input[type="file"]::file-selector-button:hover {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
+
+}
+
+/* Perbaikan layout admin untuk layar kecil */
+
+.admin-container,
+.admin-panel,
+.filter-grid,
+.filter-grid > div,
+.filter-grid > label {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.admin-panel {
+  width: 100%;
+  max-width: 100%;
+}
+
+.filter-grid {
+  width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.filter-grid input,
+.filter-grid select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+\#filterDate {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  font-size: 16px;
+  -webkit-appearance: auto;
+  appearance: auto;
+}
+
+.table-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.attendance-table {
+  width: max-content;
+  min-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .admin-container {
+    width: calc(100% - 24px);
+    max-width: 100%;
+    margin: 16px auto 32px;
+  }
+
+  .admin-panel {
+    padding: 16px 12px;
+    overflow: visible;
+  }
+
+  .filter-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .filter-grid > div {
+    width: 100%;
+  }
+
+  #filterDate,
+  .filter-grid input,
+  .filter-grid select {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+  }
+
 }
