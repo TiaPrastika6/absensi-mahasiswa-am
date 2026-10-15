@@ -29,29 +29,15 @@
       <form id="loginForm" class="admin-form">
         <div>
           <label for="email">Email admin</label>
-          <input
-            id="email"
-            type="email"
-            autocomplete="username"
-            placeholder="admin@email.com"
-            required
-          >
+          <input id="email" type="email" autocomplete="username"
+                 placeholder="admin@email.com" required>
         </div>
-
         <div>
           <label for="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            autocomplete="current-password"
-            placeholder="Masukkan password"
-            required
-          >
+          <input id="password" type="password" autocomplete="current-password"
+                 placeholder="Masukkan password" required>
         </div>
-
-        <button class="admin-button" id="loginButton" type="submit">
-          Login
-        </button>
+        <button class="admin-button" id="loginButton" type="submit">Login</button>
       </form>
 
       <div id="loginMessage" class="admin-message hidden" role="status"></div>
@@ -60,9 +46,7 @@
     <section id="dashboardPanel" class="admin-panel hidden">
       <div class="dashboard-toolbar">
         <h2>Rekap Absensi</h2>
-        <button id="logoutButton" class="admin-button secondary" type="button">
-          Logout
-        </button>
+        <button id="logoutButton" class="admin-button secondary" type="button">Logout</button>
       </div>
 
       <div class="filter-grid">
@@ -70,7 +54,6 @@
           <label for="filterDate">Tanggal</label>
           <input id="filterDate" type="date">
         </div>
-
         <div>
           <label for="filterSession">Sesi</label>
           <select id="filterSession">
@@ -79,25 +62,15 @@
             <option value="Siang">Siang</option>
           </select>
         </div>
-
         <div>
           <label for="filterNim">NIM (opsional)</label>
-          <input
-            id="filterNim"
-            type="text"
-            inputmode="numeric"
-            placeholder="Cari NIM"
-          >
+          <input id="filterNim" type="text" inputmode="numeric" placeholder="Cari NIM">
         </div>
       </div>
 
       <div class="admin-actions">
-        <button id="loadButton" class="admin-button" type="button">
-          Tampilkan Data
-        </button>
-        <button id="exportButton" class="admin-button secondary" type="button">
-          Ekspor CSV
-        </button>
+        <button id="loadButton" class="admin-button" type="button">Tampilkan Data</button>
+        <button id="exportButton" class="admin-button secondary" type="button">Ekspor CSV</button>
       </div>
 
       <div id="dashboardMessage" class="admin-message hidden" role="status"></div>
