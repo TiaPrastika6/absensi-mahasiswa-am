@@ -14,7 +14,7 @@
   const dashboardMessage = document.getElementById("dashboardMessage");
   const filterDate = document.getElementById("filterDate");
   const filterSession = document.getElementById("filterSession");
-  const filterNim = document.getElementById("filterNim");
+  const filterProgram = document.getElementById("filterProgram");
   const loadButton = document.getElementById("loadButton");
   const exportButton = document.getElementById("exportButton");
   const attendanceRows = document.getElementById("attendanceRows");
@@ -91,7 +91,7 @@
 
       tr.appendChild(createCell(formatDateTime(record.created_at)));
       tr.appendChild(createCell(record.full_name));
-      tr.appendChild(createCell(record.nim));
+      tr.appendChild(createCell(record.study_program || "-"));
       tr.appendChild(createCell(record.session));
       tr.appendChild(createCell(record.attendance_type));
       tr.appendChild(
@@ -157,8 +157,8 @@
 
       if (filterDate.value) params.set("date", filterDate.value);
       if (filterSession.value) params.set("session", filterSession.value);
-      if (filterNim.value.trim()) {
-        params.set("nim", filterNim.value.trim());
+      if (filterProgram.value) {
+        params.set("study_program", filterProgram.value);
       }
 
       const endpoint =
@@ -216,7 +216,7 @@
     const confirmed = window.confirm(
       `Yakin ingin menghapus absensi ini?\n\n` +
       `Nama: ${record.full_name}\n` +
-      `NIM: ${record.nim}\n` +
+      `Program Studi: ${record.study_program || "-"}\n` +
       `Sesi: ${record.session}\n` +
       `Jenis: ${record.attendance_type}\n\n` +
       `Data yang dihapus tidak dapat dipulihkan melalui dashboard.`
@@ -348,7 +348,7 @@
       ["Tanggal absensi", "attendance_date"],
       ["Waktu", "created_at"],
       ["Nama", "full_name"],
-      ["NIM", "nim"],
+      ["Program Studi", "study_program"],
       ["Sesi", "session"],
       ["Jenis absensi", "attendance_type"],
       ["Latitude", "latitude"],
