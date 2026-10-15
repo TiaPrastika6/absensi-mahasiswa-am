@@ -5,7 +5,7 @@
 
   const form = document.getElementById("attendanceForm");
   const nameInput = document.getElementById("fullName");
-  const nimInput = document.getElementById("nim");
+  const studyProgramInput = document.getElementById("studyProgram");
   const sessionInput = document.getElementById("session");
   const photoInput = document.getElementById("photo");
   const checkLocationButton = document.getElementById("checkLocation");
@@ -365,15 +365,15 @@ async function compressPhoto(file) {
     if (!form.reportValidity()) return;
 
     const fullName = nameInput.value.trim();
-    const nim = nimInput.value.trim();
+    const studyProgram = studyProgramInput.value;
     const session = sessionInput.value;
     const attendanceType = form.querySelector(
       'input[name="attendance_type"]:checked'
     )?.value;
     const photoFile = photoInput.files?.[0];
 
-    if (!/^[0-9]{3,30}$/.test(nim)) {
-      showMessage("NIM harus terdiri dari 3–30 angka.", "error");
+    if (!["BK", "PBSI", "PBI", "PBB", "PM", "PTI", "PJKR"].includes(studyProgram)) {
+      showMessage("Pilih program studi yang tersedia.", "error");
       return;
     }
 
@@ -420,7 +420,7 @@ async function compressPhoto(file) {
 
       const formData = new FormData();
       formData.append("full_name", fullName);
-      formData.append("nim", nim);
+      formData.append("study_program", studyProgram);
       formData.append("session", session);
       formData.append("attendance_type", attendanceType);
       formData.append("latitude", String(latitude));
