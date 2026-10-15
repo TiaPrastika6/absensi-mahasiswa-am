@@ -17,6 +17,7 @@
 /* Reset dan dasar */
 *,
 *::before,
+
 *::after {
   box-sizing: border-box;
 }
@@ -34,17 +35,17 @@ body {
   font-size: 15px;
   line-height: 1.6;
 }
-
 button,
 input,
 select,
+
 textarea {
   font: inherit;
 }
-
 button,
 a,
 input,
+
 select {
   -webkit-tap-highlight-color: transparent;
 }
@@ -64,6 +65,7 @@ button:disabled {
 }
 
 /* Header bersama */
+
 .site-header {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
@@ -130,6 +132,7 @@ button:disabled {
 }
 
 /* Halaman presensi mahasiswa */
+
 .container {
   width: min(calc(100% - 32px), 680px);
   margin: 0 auto;
@@ -161,9 +164,9 @@ button:disabled {
   color: var(--muted);
   font-size: 14px;
 }
-
 .attendance-card,
 .help-card,
+
 .schedule-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -182,9 +185,9 @@ button:disabled {
   gap: 14px;
   margin-bottom: 22px;
 }
-
 .card-heading h2,
 .help-card h2,
+
 .schedule-card h2 {
   margin: 0;
   font-size: 18px;
@@ -217,12 +220,12 @@ button:disabled {
   font-size: 13px;
   font-weight: 650;
 }
-
 input[type="text"],
 input[type="date"],
 input[type="number"],
 input[type="search"],
 select,
+
 textarea {
   width: 100%;
   min-height: 44px;
@@ -234,18 +237,18 @@ textarea {
   color: var(--text);
   font-size: 14px;
 }
-
 input[type="text"]:focus,
 input[type="date"]:focus,
 input[type="number"]:focus,
 input[type="search"]:focus,
 select:focus,
+
 textarea:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(36, 91, 143, 0.11);
 }
-
 input::placeholder,
+
 textarea::placeholder {
   color: #8a99a5;
 }
@@ -296,6 +299,7 @@ input[type="file"]::file-selector-button:hover {
 }
 
 /* Pilihan jenis presensi */
+
 .attendance-options {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -328,8 +332,8 @@ input[type="file"]::file-selector-button:hover {
 .option-icon {
   font-size: 18px;
 }
-
 .attendance-option strong,
+
 .attendance-option small {
   display: block;
 }
@@ -347,6 +351,7 @@ input[type="file"]::file-selector-button:hover {
 }
 
 /* Preview foto */
+
 .photo-preview {
   margin-top: 12px;
   padding: 12px;
@@ -375,6 +380,7 @@ input[type="file"]::file-selector-button:hover {
 }
 
 /* Panel lokasi: informasi rata tengah */
+
 .location-panel {
   display: flex;
   flex-direction: column;
@@ -434,6 +440,7 @@ input[type="file"]::file-selector-button:hover {
 }
 
 /* Pesan sukses, gagal, dan informasi */
+
 .message {
   margin: 14px 0;
   padding: 11px 13px;
@@ -464,6 +471,7 @@ input[type="file"]::file-selector-button:hover {
 }
 
 /* Tombol utama presensi */
+
 .primary-button {
   display: block;
   width: 100%;
@@ -486,8 +494,8 @@ input[type="file"]::file-selector-button:hover {
 .primary-button:active {
   transform: none;
 }
-
 .primary-button:disabled,
+
 .secondary-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -502,26 +510,27 @@ input[type="file"]::file-selector-button:hover {
 
 /* Bantuan dan pemberitahuan jadwal */
 .help-card,
+
 .schedule-card {
   margin-top: 18px;
   padding: 20px;
   box-shadow: none;
 }
-
 .help-card h2,
+
 .schedule-card h2 {
   font-size: 15px;
 }
-
 .help-card ul,
+
 .schedule-card ul {
   margin: 10px 0 0;
   padding-left: 19px;
   color: var(--muted);
   font-size: 13px;
 }
-
 .help-card li + li,
+
 .schedule-card li + li {
   margin-top: 6px;
 }
@@ -579,8 +588,8 @@ input[type="file"]::file-selector-button:hover {
   font-size: 13px;
   font-weight: 600;
 }
-
 .admin-form input,
+
 .admin-form select {
   width: 100%;
   min-height: 42px;
@@ -591,8 +600,8 @@ input[type="file"]::file-selector-button:hover {
   color: var(--text);
   font-size: 13px;
 }
-
 .admin-form input:focus,
+
 .admin-form select:focus {
   outline: none;
   border-color: var(--primary);
@@ -602,20 +611,21 @@ input[type="file"]::file-selector-button:hover {
 /* Tombol admin — class khusus bila tersedia */
 .admin-panel .primary-button,
 .admin-panel button[type="submit"],
+
 .admin-panel .btn-primary {
   background: var(--primary);
   color: #fff;
   border: 1px solid var(--primary);
 }
-
 .admin-panel .primary-button:hover,
 .admin-panel button[type="submit"]:hover,
+
 .admin-panel .btn-primary:hover {
   background: var(--primary-dark);
 }
-
 .admin-panel .secondary-button,
 .admin-panel .btn-secondary,
+
 .admin-panel .admin-link {
   background: var(--primary-light);
   color: var(--primary-dark);
@@ -624,6 +634,7 @@ input[type="file"]::file-selector-button:hover {
 
 /* Gaya dasar tombol admin agar seragam */
 .admin-panel button,
+
 .admin-panel .btn {
   min-height: 38px;
   padding: 8px 13px;
@@ -633,6 +644,7 @@ input[type="file"]::file-selector-button:hover {
 }
 
 /* Tabel admin */
+
 .admin-panel table {
   width: 100%;
   border-collapse: separate;
@@ -673,6 +685,7 @@ input[type="file"]::file-selector-button:hover {
 }
 
 /* Foto dalam tabel admin */
+
 .admin-panel table img {
   max-width: 76px;
   max-height: 76px;
@@ -681,6 +694,7 @@ input[type="file"]::file-selector-button:hover {
 }
 
 /* Komponen khusus admin.html */
+
 .dashboard-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -708,8 +722,8 @@ input[type="file"]::file-selector-button:hover {
   font-size: 12px;
   font-weight: 600;
 }
-
 .filter-grid input,
+
 .filter-grid select {
   width: 100%;
   min-height: 43px;
@@ -721,8 +735,8 @@ input[type="file"]::file-selector-button:hover {
   font: inherit;
   font-size: 13px;
 }
-
 .filter-grid input:focus,
+
 .filter-grid select:focus {
   outline: none;
   border-color: var(--primary);
@@ -812,8 +826,8 @@ input[type="file"]::file-selector-button:hover {
   white-space: nowrap;
   font-size: 12px;
 }
-
 .attendance-table th,
+
 .attendance-table td {
   padding: 11px 10px;
   text-align: left;
@@ -865,99 +879,47 @@ input[type="file"]::file-selector-button:hover {
   display: none !important;
 }
 
-/* Footer dan responsivitas */
+/* Perbaikan input tanggal dan kontrol form di Safari iPhone */
+.admin-panel,
+
+.admin-panel * {
+  box-sizing: border-box;
+}
+.filter-grid > div,
+
+.filter-grid > label {
+  min-width: 0;
+}
+
+.filter-grid input[type="date"] {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+  font-family: inherit;
+  font-size: 16px;
+}
+.admin-form input,
+.admin-form select,
+.filter-grid input,
+
+.filter-grid select {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 @media (max-width: 640px) {
-  .header-inner {
-    width: calc(100% - 24px);
-    min-height: 68px;
-    gap: 10px;
-  }
-
-  .brand {
-    gap: 9px;
-  }
-
-  .brand-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 9px;
-  }
-
-  .brand h1 {
-    font-size: 13px;
-  }
-
-  .brand p {
-    font-size: 11px;
-  }
-
-  .admin-link {
-    padding: 7px 9px;
-    font-size: 11px;
-  }
-
-  .container {
-    width: calc(100% - 24px);
-    padding-top: 22px;
-  }
-
-  .attendance-card {
-    padding: 18px 14px;
-  }
-
-  .card-heading {
-    gap: 10px;
-    margin-bottom: 18px;
-  }
-
-  .card-heading h2 {
-    font-size: 17px;
-  }
-
-  .attendance-options {
-    grid-template-columns: 1fr;
-  }
-
-  .attendance-option {
-    align-items: center;
-  }
-
-  .location-panel {
-    padding: 16px 12px;
-  }
-
-  .help-card,
-  .schedule-card {
-    padding: 17px 14px;
-  }
-
-  .admin-container {
-    width: calc(100% - 24px);
-    margin-top: 16px;
-  }
-
-  .admin-panel {
-    padding: 16px 12px;
-    overflow: hidden;
-  }
-
-  .admin-form {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .admin-panel table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-
   .filter-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
-
-  .admin-panel {
-    overflow: hidden;
+  .filter-grid input[type="date"] {
+    width: 100%;
+    min-width: 0;
+    font-size: 16px;
   }
 }
 
