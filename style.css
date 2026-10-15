@@ -710,7 +710,7 @@ input[type="file"]::file-selector-button:hover {
 
 .filter-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 14px;
 }
@@ -997,5 +997,13 @@ input[type="file"]::file-selector-button:hover {
   *::after {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* Filter rekap: empat pilihan di desktop, dua kolom di tablet */
+@media (min-width: 641px) and (max-width: 900px) {
+  .filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
