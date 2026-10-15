@@ -29,6 +29,55 @@
   let currentLocation = null;
   let previewUrl = null;
   let isSubmitting = false;
+  
+  // Tampilkan formulir hanya ketika setidaknya satu jadwal terbuka.
+  const attendanceCard = document.getElementById("attendanceCard");
+  const scheduleClosed = document.getElementById("scheduleClosed");
+  const scheduleMessage = document.getElementById("scheduleMessage");
+
+  function updateScheduleVisibility() {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Makassar",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23"
+    }).formatToParts(new Date());
+
+    const getPart = type =>
+      Number(parts.find(item => item.type === type)?.value ?? 0);
+
+    const now =
+      getPart("hour") * 3600 +
+      getPart("minute") * 60 +
+      getPart("second");
+
+    const windows = [
+      { start: 6 * 3600, end: 7 * 3600 },
+      { start: 12 * 3600, end: 13 * 3600 },
+      { start: 11 * 3600, end: 12 * 3600 },
+      { start: 17 * 3600, end: 18 * 3600 }
+    ];
+
+    const isOpen = windows.some(
+      window => now >= window.start && now < window.end
+    );
+
+    attendanceCard.hidden = !isOpen;
+    scheduleClosed.hidden = isOpen;
+
+    if (!isOpen) {
+      scheduleMessage.textContent =
+        "Saat ini tidak ada jadwal presensi yang dibuka. " +
+        "Formulir akan tersedia otomatis ketika jadwal berikutnya dimulai.";
+    }
+  }
+
+  updateScheduleVisibility();
+
+  // Periksa jadwal kembali setiap 15 detik tanpa perlu refresh.
+  setInterval(updateScheduleVisibility, 15000);
+
 
   function showMessage(message, type = "info") {
     formMessage.textContent = message;
