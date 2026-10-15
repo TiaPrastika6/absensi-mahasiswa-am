@@ -58,7 +58,6 @@
     if (!value) return "-";
 
     const date = new Date(value);
-
     if (Number.isNaN(date.getTime())) return "-";
 
     return new Intl.DateTimeFormat("id-ID", {
@@ -80,7 +79,7 @@
     if (!records.length) {
       const tr = document.createElement("tr");
       const td = createCell("Tidak ada data absensi untuk filter ini.");
-      td.colSpan = 7;
+      td.colSpan = 8;
       tr.appendChild(td);
       attendanceRows.appendChild(tr);
       summary.textContent = "Total: 0 catatan absensi.";
@@ -118,6 +117,20 @@
       }
 
       tr.appendChild(photoCell);
+
+      // Tombol hapus untuk setiap baris.
+      const actionCell = document.createElement("td");
+      const deleteButton = document.createElement("button");
+
+      deleteButton.type = "button";
+      deleteButton.textContent = "Hapus";
+      deleteButton.className = "delete-attendance-button";
+      deleteButton.addEventListener("click", () => {
+        deleteAttendance(record);
+      });
+
+      actionCell.appendChild(deleteButton);
+      tr.appendChild(actionCell);
       attendanceRows.appendChild(tr);
     }
 
@@ -142,14 +155,8 @@
 
       const params = new URLSearchParams();
 
-      if (filterDate.value) {
-        params.set("date", filterDate.value);
-      }
-
-      if (filterSession.value) {
-        params.set("session", filterSession.value);
-      }
-
+      if (filterDate.value) params.set("date", filterDate.value);
+      if (filterSession.value) params.set("session", filterSession.value);
       if (filterNim.value.trim()) {
         params.set("nim", filterNim.value.trim());
       }
@@ -175,9 +182,7 @@
       }
 
       if (!response.ok || !result.success) {
-        throw new Error(
-          result.error || "Gagal mengambil rekap absensi."
-        );
+        throw new Error(result.error || "Gagal mengambil rekap absensi.");
       }
 
       currentRecords = Array.isArray(result.attendance)
@@ -205,9 +210,83 @@
     }
   }
 
+  async function deleteAttendance(record) {
+    if (busy) return;
+
+    const confirmed = window.confirm(
+      `Yakin ingin menghapus absensi ini?\n\n` +
+      `Nama: ${record.full_name}\n` +
+      `NIM: ${record.nim}\n` +
+      `Sesi: ${record.session}\n` +
+      `Jenis: ${record.attendance_type}\n\n` +
+      `Data yang dihapus tidak dapat dipulihkan melalui dashboard.`
+    );
+
+    if (!confirmed) return;
+
+    hideMessage(dashboardMessage);
+    setBusy(true);
+
+    try {
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getSession();
+
+      if (sessionError || !sessionData.session) {
+        setLoggedIn(false);
+        throw new Error("Sesi login berakhir. Silakan login kembali.");
+      }
+
+      const response = await fetch(
+        `${config.SUPABASE_URL}/functions/v1/admin-attendance`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: config.SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${sessionData.session.access_token}`
+          },
+          body: JSON.stringify({
+            action: "delete",
+            id: record.id
+          })
+        }
+      );
+
+      const result = await response.json().catch(() => ({}));
+
+      if (response.status === 401) {
+        await supabase.auth.signOut();
+        setLoggedIn(false);
+        throw new Error("Sesi tidak valid. Silakan login kembali.");
+      }
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Gagal menghapus absensi.");
+      }
+
+      showMessage(
+        dashboardMessage,
+        result.message || "Absensi berhasil dihapus.",
+        "success"
+      );
+
+      // Muat ulang data agar tabel mencerminkan database.
+      await loadAttendance();
+    } catch (error) {
+      showMessage(
+        dashboardMessage,
+        error instanceof Error
+          ? error.message
+          : "Terjadi kesalahan saat menghapus absensi.",
+        "error"
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   loginForm.addEventListener("submit", async event => {
     event.preventDefault();
-
     if (busy) return;
 
     hideMessage(loginMessage);
@@ -225,8 +304,6 @@
 
       passwordInput.value = "";
       setLoggedIn(true);
-
-      // Fungsi backend tetap memeriksa apakah akun ini admin.
       await loadAttendance();
     } catch (error) {
       showMessage(
@@ -286,12 +363,8 @@
         columns.map(([, key]) => {
           let value = record[key];
 
-          if (key === "created_at") {
-            value = formatDateTime(value);
-          }
+          if (key === "created_at") value = formatDateTime(value);
 
-          // Mencegah nilai teks yang diawali karakter formula
-          // dieksekusi oleh aplikasi spreadsheet.
           if (
             typeof value === "string" &&
             /^[\s]*[=+\-@]/.test(value)
@@ -310,7 +383,8 @@
     const link = document.createElement("a");
 
     link.href = url;
-    link.download = `rekap-absensi-${filterDate.value || "semua-tanggal"}.csv`;
+    link.download =
+      `rekap-absensi-${filterDate.value || "semua-tanggal"}.csv`;
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -354,9 +428,7 @@
 
     setLoggedIn(Boolean(data.session));
 
-    if (data.session) {
-      await loadAttendance();
-    }
+    if (data.session) await loadAttendance();
   }
 
   initialize();
