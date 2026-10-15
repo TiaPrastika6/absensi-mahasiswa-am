@@ -145,86 +145,130 @@
     }
   }
 
-  // Ubah foto yang didukung browser menjadi JPEG dan kompres ukurannya.
-  // Jika browser tidak dapat membaca HEIC, minta pengguna memilih foto lain.
-  async function compressPhoto(file) {
-    const supportedTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/webp",
-      "image/heic",
-      "image/heif"
-    ];
+  
+async function compressPhoto(file) {
+  if (!file || file.size === 0) {
+    throw new Error("File foto kosong atau tidak valid.");
+  }
 
-    if (!file || !supportedTypes.includes(file.type.toLowerCase())) {
+  const supportedTypes = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/webp",
+    "image/heic",
+    "image/heif"
+  ];
+
+  const fileName = (file.name || "").toLowerCase();
+  const isHeic =
+    file.type.toLowerCase().includes("heic") ||
+    file.type.toLowerCase().includes("heif") ||
+    /\.(heic|heif)$/.test(fileName);
+
+  let inputFile = file;
+
+  // Konversi HEIC/HEIF ke JPEG secara otomatis di browser.
+  if (isHeic) {
+    if (typeof window.heic2any !== "function") {
       throw new Error(
-        "Format foto tidak didukung. Pilih JPG, PNG, atau WebP."
+        "Fitur konversi HEIC belum tersedia. Periksa koneksi internet, " +
+        "lalu coba kembali atau pilih foto JPEG."
       );
     }
-
-    if (file.size === 0) {
-      throw new Error("File foto kosong atau tidak valid.");
-    }
-
-    if (file.type === "image/heic" || file.type === "image/heif") {
-      throw new Error(
-        "Browser belum dapat membaca foto HEIC/HEIF ini. " +
-        "Pilih foto JPEG/JPG dari galeri, atau ubah format foto pada perangkat."
-      );
-    }
-
-    const bitmap = await createImageBitmap(file);
 
     try {
-      const maxDimension = 1600;
-      const scale = Math.min(
-        1,
-        maxDimension / Math.max(bitmap.width, bitmap.height)
+      const converted = await window.heic2any({
+        blob: file,
+        toType: "image/jpeg",
+        quality: 0.85
+      });
+
+      inputFile = Array.isArray(converted)
+        ? converted[0]
+        : converted;
+    } catch (error) {
+      console.error("Konversi HEIC gagal:", error);
+      throw new Error(
+        "Foto HEIC tidak dapat dikonversi. Coba pilih foto lain dari galeri."
       );
+    }
+  } else if (!supportedTypes.includes(file.type.toLowerCase())) {
+    throw new Error(
+      "Format foto tidak didukung. Gunakan JPG, PNG, WebP, atau HEIC."
+    );
+  }
 
-      const canvas = document.createElement("canvas");
-      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+  let bitmap;
 
-      const context = canvas.getContext("2d");
-      if (!context) {
-        throw new Error("Tidak dapat memproses foto pada browser ini.");
-      }
+  try {
+    bitmap = await createImageBitmap(inputFile);
+  } catch (error) {
+    console.error("Foto tidak dapat dibaca:", error);
+    throw new Error(
+      "Foto tidak dapat dibaca oleh browser. Coba pilih foto lain."
+    );
+  }
 
-      context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  try {
+    const maxDimension = 1600;
+    const scale = Math.min(
+      1,
+      maxDimension / Math.max(bitmap.width, bitmap.height)
+    );
 
-      let quality = 0.82;
-      let output = await new Promise(resolve =>
-        canvas.toBlob(resolve, "image/jpeg", quality)
-      );
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
 
-      while (output && output.size > config.PHOTO.TARGET_SIZE_BYTES &&
-             quality > 0.35) {
-        quality -= 0.1;
-        output = await new Promise(resolve =>
-          canvas.toBlob(resolve, "image/jpeg", quality)
-        );
-      }
+    const context = canvas.getContext("2d");
+
+    if (!context) {
+      throw new Error("Browser tidak dapat memproses foto.");
+    }
+
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+
+    const targetBytes = config.PHOTO.TARGET_SIZE_BYTES;
+    let quality = 0.85;
+    let output = null;
+
+    // Turunkan kualitas secara bertahap sampai target ukuran tercapai.
+    for (let attempt = 0; attempt < 7; attempt++) {
+      output = await new Promise((resolve) => {
+        canvas.toBlob(resolve, "image/jpeg", quality);
+      });
 
       if (!output) {
-        throw new Error("Gagal mengubah foto menjadi JPEG.");
+        throw new Error("Gagal membuat foto JPEG.");
       }
 
-      if (output.size > config.PHOTO.MAX_SIZE_BYTES) {
-        throw new Error(
-          "Foto masih terlalu besar setelah kompresi. Pilih foto lain."
-        );
+      if (
+        output.size <= targetBytes ||
+        quality <= 0.35
+      ) {
+        break;
       }
 
-      return new File(
-        [output],
-        `absensi-${Date.now()}.jpg`,
-        { type: "image/jpeg" }
-      );
-    } finally {
-      bitmap.close();
+      quality = Math.max(0.35, quality - 0.1);
     }
+
+    if (!output || output.size > config.PHOTO.MAX_SIZE_BYTES) {
+      throw new Error(
+        "Ukuran foto masih terlalu besar. Silakan pilih foto lain."
+      );
+    }
+
+    return new File(
+      [output],
+      `absensi-${Date.now()}.jpg`,
+      { type: "image/jpeg" }
+    );
+  } finally {
+    bitmap.close();
   }
+}
+
 
   function resetPhotoPreview() {
     if (previewUrl) {
