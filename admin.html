@@ -1,1 +1,321 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f766e">
+  <title>Admin Absensi Mahasiswa AM</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .admin-container {
+      width: min(100% - 32px, 1100px);
+      margin: 30px auto 50px;
+    }
 
+    .admin-panel {
+      background: white;
+      border: 1px solid #dce6e8;
+      border-radius: 18px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 30px rgba(23, 43, 53, .05);
+    }
+
+    .admin-panel h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    .admin-form {
+      display: grid;
+      gap: 15px;
+      max-width: 460px;
+    }
+
+    .admin-form label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .admin-form input,
+    .admin-form select {
+      width: 100%;
+      min-height: 45px;
+      padding: 10px 12px;
+      border: 1px solid #dce6e8;
+      border-radius: 10px;
+      background: white;
+      color: #172b35;
+    }
+
+    .admin-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .admin-button {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 16px;
+      background: #0f766e;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .admin-button.secondary {
+      background: #e7f5f3;
+      color: #115e59;
+    }
+
+    .admin-button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .admin-message {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      background: #f0f7ff;
+      color: #175cd3;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .admin-message.error {
+      background: #fff1f0;
+      color: #b42318;
+    }
+
+    .admin-message.success {
+      background: #ecfdf3;
+      color: #067647;
+    }
+
+    .dashboard-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .dashboard-toolbar h2 {
+      margin: 0;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .filter-grid label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .filter-grid input,
+    .filter-grid select {
+      width: 100%;
+      min-height: 43px;
+      padding: 9px;
+      border: 1px solid #dce6e8;
+      border-radius: 9px;
+      background: white;
+    }
+
+    .summary {
+      margin: 14px 0;
+      color: #647782;
+      font-size: 13px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid #dce6e8;
+      border-radius: 12px;
+    }
+
+    .attendance-table {
+      width: 100%;
+      border-collapse: collapse;
+      white-space: nowrap;
+      font-size: 13px;
+    }
+
+    .attendance-table th,
+    .attendance-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e8eef0;
+    }
+
+    .attendance-table th {
+      background: #f4f8f8;
+      font-size: 12px;
+    }
+
+    .attendance-table tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .photo-link {
+      color: #0f766e;
+      font-weight: 700;
+      text-decoration: underline;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 650px) {
+      .admin-container {
+        width: calc(100% - 24px);
+        margin-top: 20px;
+      }
+
+      .admin-panel {
+        padding: 18px 14px;
+      }
+
+      .filter-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">AM</div>
+        <div>
+          <h1>Admin Absensi</h1>
+          <p>SMP Negeri 6 Singaraja</p>
+        </div>
+      </div>
+      <a class="admin-link" href="index.html">Halaman Absensi</a>
+    </div>
+  </header>
+
+  <main class="admin-container">
+    <section id="loginPanel" class="admin-panel">
+      <h2>Login Admin</h2>
+      <p>Masuk menggunakan akun admin yang sudah terdaftar.</p>
+
+      <form id="loginForm" class="admin-form">
+        <div>
+          <label for="email">Email admin</label>
+          <input
+            id="email"
+            type="email"
+            autocomplete="username"
+            placeholder="admin@email.com"
+            required
+          >
+        </div>
+
+        <div>
+          <label for="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Masukkan password"
+            required
+          >
+        </div>
+
+        <button class="admin-button" id="loginButton" type="submit">
+          Login
+        </button>
+      </form>
+
+      <div id="loginMessage" class="admin-message hidden" role="status"></div>
+    </section>
+
+    <section id="dashboardPanel" class="admin-panel hidden">
+      <div class="dashboard-toolbar">
+        <h2>Rekap Absensi</h2>
+        <button id="logoutButton" class="admin-button secondary" type="button">
+          Logout
+        </button>
+      </div>
+
+      <div class="filter-grid">
+        <div>
+          <label for="filterDate">Tanggal</label>
+          <input id="filterDate" type="date">
+        </div>
+
+        <div>
+          <label for="filterSession">Sesi</label>
+          <select id="filterSession">
+            <option value="">Semua sesi</option>
+            <option value="Pagi">Pagi</option>
+            <option value="Siang">Siang</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="filterNim">NIM (opsional)</label>
+          <input id="filterNim" type="text" inputmode="numeric"
+            placeholder="Cari NIM">
+        </div>
+      </div>
+
+      <div class="admin-actions">
+        <button id="loadButton" class="admin-button" type="button">
+          Tampilkan Data
+        </button>
+        <button id="exportButton" class="admin-button secondary" type="button">
+          Ekspor CSV
+        </button>
+      </div>
+
+      <div id="dashboardMessage" class="admin-message hidden" role="status"></div>
+      <p id="summary" class="summary">Belum ada data yang dimuat.</p>
+
+      <div class="table-wrap">
+        <table class="attendance-table">
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Nama</th>
+              <th>NIM</th>
+              <th>Sesi</th>
+              <th>Jenis</th>
+              <th>Jarak (m)</th>
+              <th>Foto</th>
+            </tr>
+          </thead>
+          <tbody id="attendanceRows">
+            <tr>
+              <td colspan="7">Silakan login untuk melihat rekap absensi.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Absensi Mahasiswa AM · Halaman khusus admin</p>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
