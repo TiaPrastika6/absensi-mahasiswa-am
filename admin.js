@@ -272,7 +272,8 @@
         "success"
       );
 
-      // Muat ulang data agar tabel mencerminkan database.
+      // Izinkan pemuatan ulang setelah penghapusan berhasil.
+      setBusy(false);
       await loadAttendance();
     } catch (error) {
       showMessage(
