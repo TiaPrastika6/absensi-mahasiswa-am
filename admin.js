@@ -1,0 +1,363 @@
+(() => {
+  "use strict";
+
+  const config = window.APP_CONFIG;
+
+  const loginPanel = document.getElementById("loginPanel");
+  const dashboardPanel = document.getElementById("dashboardPanel");
+  const loginForm = document.getElementById("loginForm");
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const loginButton = document.getElementById("loginButton");
+  const logoutButton = document.getElementById("logoutButton");
+  const loginMessage = document.getElementById("loginMessage");
+  const dashboardMessage = document.getElementById("dashboardMessage");
+  const filterDate = document.getElementById("filterDate");
+  const filterSession = document.getElementById("filterSession");
+  const filterNim = document.getElementById("filterNim");
+  const loadButton = document.getElementById("loadButton");
+  const exportButton = document.getElementById("exportButton");
+  const attendanceRows = document.getElementById("attendanceRows");
+  const summary = document.getElementById("summary");
+
+  let supabase = null;
+  let currentRecords = [];
+  let busy = false;
+
+  function showMessage(element, message, type = "") {
+    element.textContent = message;
+    element.className = `admin-message ${type}`.trim();
+    element.classList.remove("hidden");
+  }
+
+  function hideMessage(element) {
+    element.textContent = "";
+    element.className = "admin-message hidden";
+  }
+
+  function setLoggedIn(isLoggedIn) {
+    loginPanel.classList.toggle("hidden", isLoggedIn);
+    dashboardPanel.classList.toggle("hidden", !isLoggedIn);
+  }
+
+  function setBusy(value) {
+    busy = value;
+    loadButton.disabled = value;
+    exportButton.disabled = value;
+    loginButton.disabled = value;
+    loginButton.textContent = value ? "Memproses..." : "Login";
+    loadButton.textContent = value ? "Memuat..." : "Tampilkan Data";
+  }
+
+  function escapeCsv(value) {
+    const text = String(value ?? "");
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+
+  function formatDateTime(value) {
+    if (!value) return "-";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return "-";
+
+    return new Intl.DateTimeFormat("id-ID", {
+      dateStyle: "short",
+      timeStyle: "medium",
+      timeZone: "Asia/Makassar"
+    }).format(date);
+  }
+
+  function createCell(value) {
+    const td = document.createElement("td");
+    td.textContent = value ?? "-";
+    return td;
+  }
+
+  function renderRecords(records) {
+    attendanceRows.replaceChildren();
+
+    if (!records.length) {
+      const tr = document.createElement("tr");
+      const td = createCell("Tidak ada data absensi untuk filter ini.");
+      td.colSpan = 7;
+      tr.appendChild(td);
+      attendanceRows.appendChild(tr);
+      summary.textContent = "Total: 0 catatan absensi.";
+      return;
+    }
+
+    for (const record of records) {
+      const tr = document.createElement("tr");
+
+      tr.appendChild(createCell(formatDateTime(record.created_at)));
+      tr.appendChild(createCell(record.full_name));
+      tr.appendChild(createCell(record.nim));
+      tr.appendChild(createCell(record.session));
+      tr.appendChild(createCell(record.attendance_type));
+      tr.appendChild(
+        createCell(
+          Number.isFinite(Number(record.distance_m))
+            ? Math.round(Number(record.distance_m))
+            : "-"
+        )
+      );
+
+      const photoCell = document.createElement("td");
+
+      if (record.photo_url) {
+        const link = document.createElement("a");
+        link.href = record.photo_url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = "Lihat foto";
+        link.className = "photo-link";
+        photoCell.appendChild(link);
+      } else {
+        photoCell.textContent = "Tidak tersedia";
+      }
+
+      tr.appendChild(photoCell);
+      attendanceRows.appendChild(tr);
+    }
+
+    summary.textContent =
+      `Total: ${records.length} catatan absensi yang ditampilkan.`;
+  }
+
+  async function loadAttendance() {
+    if (busy) return;
+
+    hideMessage(dashboardMessage);
+    setBusy(true);
+
+    try {
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getSession();
+
+      if (sessionError || !sessionData.session) {
+        setLoggedIn(false);
+        throw new Error("Sesi login berakhir. Silakan login kembali.");
+      }
+
+      const params = new URLSearchParams();
+
+      if (filterDate.value) {
+        params.set("date", filterDate.value);
+      }
+
+      if (filterSession.value) {
+        params.set("session", filterSession.value);
+      }
+
+      if (filterNim.value.trim()) {
+        params.set("nim", filterNim.value.trim());
+      }
+
+      const endpoint =
+        `${config.SUPABASE_URL}/functions/v1/admin-attendance` +
+        (params.size ? `?${params.toString()}` : "");
+
+      const response = await fetch(endpoint, {
+        method: "GET",
+        headers: {
+          apikey: config.SUPABASE_PUBLISHABLE_KEY,
+          Authorization: `Bearer ${sessionData.session.access_token}`
+        }
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if (response.status === 401) {
+        await supabase.auth.signOut();
+        setLoggedIn(false);
+        throw new Error("Sesi tidak valid. Silakan login kembali.");
+      }
+
+      if (!response.ok || !result.success) {
+        throw new Error(
+          result.error || "Gagal mengambil rekap absensi."
+        );
+      }
+
+      currentRecords = Array.isArray(result.attendance)
+        ? result.attendance
+        : [];
+
+      renderRecords(currentRecords);
+      showMessage(
+        dashboardMessage,
+        "Rekap absensi berhasil dimuat.",
+        "success"
+      );
+    } catch (error) {
+      currentRecords = [];
+      renderRecords([]);
+      showMessage(
+        dashboardMessage,
+        error instanceof Error
+          ? error.message
+          : "Terjadi kesalahan saat mengambil data.",
+        "error"
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  loginForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    if (busy) return;
+
+    hideMessage(loginMessage);
+    setBusy(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: emailInput.value.trim(),
+        password: passwordInput.value
+      });
+
+      if (error || !data.session) {
+        throw new Error("Login gagal. Periksa email dan password.");
+      }
+
+      passwordInput.value = "";
+      setLoggedIn(true);
+
+      // Fungsi backend tetap memeriksa apakah akun ini admin.
+      await loadAttendance();
+    } catch (error) {
+      showMessage(
+        loginMessage,
+        error instanceof Error ? error.message : "Login gagal.",
+        "error"
+      );
+    } finally {
+      setBusy(false);
+    }
+  });
+
+  logoutButton.addEventListener("click", async () => {
+    logoutButton.disabled = true;
+
+    try {
+      await supabase.auth.signOut();
+      currentRecords = [];
+      renderRecords([]);
+      setLoggedIn(false);
+      showMessage(loginMessage, "Kamu sudah logout.", "success");
+    } catch {
+      showMessage(loginMessage, "Gagal logout. Coba lagi.", "error");
+    } finally {
+      logoutButton.disabled = false;
+    }
+  });
+
+  loadButton.addEventListener("click", loadAttendance);
+
+  exportButton.addEventListener("click", () => {
+    if (!currentRecords.length) {
+      showMessage(
+        dashboardMessage,
+        "Tidak ada data untuk diekspor.",
+        "error"
+      );
+      return;
+    }
+
+    const columns = [
+      ["Tanggal absensi", "attendance_date"],
+      ["Waktu", "created_at"],
+      ["Nama", "full_name"],
+      ["NIM", "nim"],
+      ["Sesi", "session"],
+      ["Jenis absensi", "attendance_type"],
+      ["Latitude", "latitude"],
+      ["Longitude", "longitude"],
+      ["Akurasi GPS (m)", "accuracy_m"],
+      ["Jarak (m)", "distance_m"]
+    ];
+
+    const rows = [
+      columns.map(([label]) => escapeCsv(label)),
+      ...currentRecords.map(record =>
+        columns.map(([, key]) => {
+          let value = record[key];
+
+          if (key === "created_at") {
+            value = formatDateTime(value);
+          }
+
+          // Mencegah nilai teks yang diawali karakter formula
+          // dieksekusi oleh aplikasi spreadsheet.
+          if (
+            typeof value === "string" &&
+            /^[\s]*[=+\-@]/.test(value)
+          ) {
+            value = `'${value}`;
+          }
+
+          return escapeCsv(value);
+        })
+      )
+    ];
+
+    const csv = "\uFEFF" + rows.map(row => row.join(",")).join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `rekap-absensi-${filterDate.value || "semua-tanggal"}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  async function initialize() {
+    if (
+      !config ||
+      !config.SUPABASE_URL ||
+      !config.SUPABASE_PUBLISHABLE_KEY ||
+      !window.supabase
+    ) {
+      showMessage(
+        loginMessage,
+        "Konfigurasi Supabase atau library belum tersedia.",
+        "error"
+      );
+      return;
+    }
+
+    supabase = window.supabase.createClient(
+      config.SUPABASE_URL,
+      config.SUPABASE_PUBLISHABLE_KEY,
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true
+        }
+      }
+    );
+
+    const { data, error } = await supabase.auth.getSession();
+
+    if (error) {
+      setLoggedIn(false);
+      showMessage(loginMessage, "Gagal memeriksa sesi login.", "error");
+      return;
+    }
+
+    setLoggedIn(Boolean(data.session));
+
+    if (data.session) {
+      await loadAttendance();
+    }
+  }
+
+  initialize();
+})();
