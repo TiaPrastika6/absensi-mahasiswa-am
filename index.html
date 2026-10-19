@@ -38,12 +38,28 @@
       <h3>Jadwal Presensi WITA</h3>
       <ul>
         <li>Sesi Pagi — Datang: 06.00–07.00</li>
+        <li>PJKR (Selasa–Jumat) — Datang sesi pagi: 08.30–09.30</li>
         <li>Sesi Pagi — Pulang: 12.00–13.00</li>
         <li>Sesi Siang — Datang: 11.00–12.00</li>
         <li>Sesi Siang — Pulang: 17.00–18.00</li>
       </ul>
       <p>Silakan kembali saat jadwal presensi dibuka.</p>
     </section>
+
+      <section id="successPanel" class="attendance-success" role="status" aria-live="assertive" hidden>
+        <div class="success-check" aria-hidden="true">✓</div>
+        <p class="success-eyebrow">KONFIRMASI ABSENSI</p>
+        <h2 id="successTitle">Absensi berhasil tersimpan!</h2>
+        <p class="success-lead">Data absensimu sudah diterima oleh sistem.</p>
+        <dl class="success-details">
+          <div><dt>Nama</dt><dd id="successName">-</dd></div>
+          <div><dt>Program Studi</dt><dd id="successProgram">-</dd></div>
+          <div><dt>Sesi</dt><dd id="successSession">-</dd></div>
+          <div><dt>Jenis Absensi</dt><dd id="successType">-</dd></div>
+          <div><dt>Waktu tercatat</dt><dd id="successTime">-</dd></div>
+        </dl>
+        <p class="success-reminder">Jangan tekan Kirim Absensi lagi. Absensimu sudah tercatat. Jika ada masalah, hubungi koordinator.</p>
+      </section>
 
     <section class="attendance-card" id="attendanceCard" hidden>
       <div class="card-heading">
