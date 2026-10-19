@@ -336,7 +336,14 @@
       showMessage(correctionMessage, "Lengkapi seluruh data dan alasan minimal 8 karakter.", "error");
       return;
     }
-    if (!window.confirm(`Pastikan kehadiran sudah diverifikasi. Catat koreksi Datang?\n\nNama: ${fullName}\nProdi: ${studyProgram}\nTanggal: ${attendanceDate}\nSesi: ${session}\nAlasan: ${reason}`)) return;
+    if (!window.confirm("Konfirmasi Koreksi Kehadiran\n\n" +
+      "Pastikan kehadiran mahasiswa sudah diverifikasi sebelum menyimpan koreksi.\n\n" +
+      "Nama: " + fullName + "\n" +
+      "Prodi: " + studyProgram + "\n" +
+      "Tanggal: " + attendanceDate + "\n" +
+      "Sesi: " + session + "\n" +
+      "Jenis koreksi: Datang\n" +
+      "Alasan: " + reason)) return;
     correctionButton.disabled = true;
     correctionButton.textContent = "Menyimpan...";
     try {
