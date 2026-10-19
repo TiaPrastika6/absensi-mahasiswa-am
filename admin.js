@@ -12,6 +12,7 @@
   const logoutButton = document.getElementById("logoutButton");
   const loginMessage = document.getElementById("loginMessage");
   const dashboardMessage = document.getElementById("dashboardMessage");
+  const filterName = document.getElementById("filterName");
   const filterDate = document.getElementById("filterDate");
   const filterSession = document.getElementById("filterSession");
   const filterType = document.getElementById("filterType");
@@ -75,6 +76,10 @@
   }
 
   function renderRecords(records) {
+    const nameQuery = (filterName?.value || "").trim().toLocaleLowerCase("id-ID");
+    if (nameQuery) records = records.filter(record =>
+      String(record.full_name || "").toLocaleLowerCase("id-ID").includes(nameQuery)
+    );
     attendanceRows.replaceChildren();
 
     if (!records.length) {
@@ -336,6 +341,7 @@
   });
 
   loadButton.addEventListener("click", loadAttendance);
+  filterName?.addEventListener("input", () => renderRecords(currentRecords));
 
   exportButton.addEventListener("click", () => {
     if (!currentRecords.length) {
