@@ -65,16 +65,13 @@
       { start: 8 * 3600 + 30 * 60, end: 9 * 3600 + 30 * 60 }
     ];
 
-    const isOpen = windows.some(
+    const isLocalPreview =
+      ["127.0.0.1", "localhost"].includes(window.location.hostname) &&
+      new URLSearchParams(window.location.search).get("preview") === "1";
+
+    const isOpen = isLocalPreview || windows.some(
       window => now >= window.start && now < window.end
     );
-    // const isLocalPreview =
-    //   ["127.0.0.1", "localhost"].includes(window.location.hostname) &&
-    //   new URLSearchParams(window.location.search).get("preview") === "1";
-
-    // const isOpen = isLocalPreview || windows.some(
-    //   window => now >= window.start && now < window.end
-    // );
 
     attendanceCard.hidden = !isOpen;
     scheduleClosed.hidden = isOpen;
