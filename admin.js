@@ -13,6 +13,13 @@
   const loginMessage = document.getElementById("loginMessage");
   const dashboardMessage = document.getElementById("dashboardMessage");
   const filterName = document.getElementById("filterName");
+  const correctionForm = document.getElementById("correctionForm");
+  const correctionName = document.getElementById("correctionName");
+  const correctionProgram = document.getElementById("correctionProgram");
+  const correctionDate = document.getElementById("correctionDate");
+  const correctionSession = document.getElementById("correctionSession");
+  const correctionReason = document.getElementById("correctionReason");
+  const correctionButton = document.getElementById("correctionButton");
   const filterDate = document.getElementById("filterDate");
   const filterSession = document.getElementById("filterSession");
   const filterType = document.getElementById("filterType");
@@ -292,6 +299,49 @@
       setBusy(false);
     }
   }
+
+  if (correctionDate) {
+    const now = new Date();
+    const witaDate = new Date(now.getTime() + (8 * 60 + 0) * 60000 - now.getTimezoneOffset() * 60000);
+    correctionDate.value = witaDate.toISOString().slice(0, 10);
+  }
+
+  correctionForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (busy) return;
+    const fullName = correctionName.value.trim().replace(/\s+/g, " ");
+    const studyProgram = correctionProgram.value;
+    const attendanceDate = correctionDate.value;
+    const session = correctionSession.value;
+    const reason = correctionReason.value.trim();
+    if (fullName.length < 2 || !studyProgram || !attendanceDate || !session || reason.length < 8) {
+      showMessage(dashboardMessage, "Lengkapi identitas, tanggal, sesi, dan alasan koreksi minimal 8 karakter.", "error");
+      return;
+    }
+    if (!window.confirm(`Pastikan kehadiran sudah diverifikasi. Catat koreksi Datang?\n\nNama: ${fullName}\nProdi: ${studyProgram}\nTanggal: ${attendanceDate}\nSesi: ${session}\nAlasan: ${reason}`)) return;
+    hideMessage(dashboardMessage);
+    setBusy(true);
+    correctionButton.disabled = true;
+    try {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !sessionData.session) throw new Error("Sesi login berakhir. Silakan login kembali.");
+      const response = await fetch(`${config.SUPABASE_URL}/functions/v1/admin-attendance`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: config.SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${sessionData.session.access_token}` },
+        body: JSON.stringify({ action: "correct_arrival", full_name: fullName, study_program: studyProgram, attendance_date: attendanceDate, session, reason })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.success) throw new Error(result.error || "Koreksi gagal disimpan.");
+      showMessage(dashboardMessage, result.message || "Koreksi berhasil dicatat.", "success");
+      correctionForm.reset();
+      await loadAttendance();
+    } catch (error) {
+      showMessage(dashboardMessage, error instanceof Error ? error.message : "Koreksi gagal disimpan.", "error");
+    } finally {
+      setBusy(false);
+      correctionButton.disabled = false;
+    }
+  });
 
   loginForm.addEventListener("submit", async event => {
     event.preventDefault();
