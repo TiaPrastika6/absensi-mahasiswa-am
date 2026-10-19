@@ -1077,3 +1077,38 @@ input[type="file"]::file-selector-button:hover {
   color: #ffffff !important;
   border-color: #16834a !important;
 }
+
+
+/* Tampilan khusus section koreksi kehadiran admin */
+.correction-nav { margin: 18px 0 8px; }
+.correction-panel { max-width: 980px; }
+.correction-panel > p { color: var(--muted); line-height: 1.65; }
+.correction-explainer {
+  margin: 18px 0 22px;
+  padding: 16px 18px;
+  border: 1px solid #cbdcf0;
+  border-left: 4px solid var(--primary);
+  border-radius: 10px;
+  background: #f4f8fc;
+  color: #30465a;
+  line-height: 1.65;
+}
+.correction-explainer strong { display: block; margin-bottom: 7px; color: var(--primary-dark); font-size: 15px; }
+.correction-explainer p { margin: 6px 0 0; }
+.correction-form { max-width: 760px; gap: 18px; }
+.correction-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.correction-fields > div { min-width: 0; }
+.correction-fields input, .correction-fields select,
+.correction-form textarea {
+  width: 100%; min-width: 0; box-sizing: border-box;
+}
+.correction-form textarea { min-height: 112px; resize: vertical; }
+.correction-form .admin-actions { margin-top: 2px; }
+@media (max-width: 640px) {
+  .correction-fields { grid-template-columns: minmax(0, 1fr); gap: 13px; }
+  .correction-explainer { padding: 14px; }
+}
