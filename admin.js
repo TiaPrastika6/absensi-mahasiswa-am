@@ -110,7 +110,7 @@
     if (!records.length) {
       const tr = document.createElement("tr");
       const td = createCell("Tidak ada data absensi untuk filter ini.");
-      td.colSpan = 8;
+      td.colSpan = 9;
       tr.appendChild(td);
       attendanceRows.appendChild(tr);
       summary.textContent = "Total: 0 catatan absensi.";
@@ -125,6 +125,11 @@
       tr.appendChild(createCell(record.study_program || "-"));
       tr.appendChild(createCell(record.session));
       tr.appendChild(createCell(record.attendance_type));
+      tr.appendChild(createCell(
+        record.is_manual_correction
+          ? `Koreksi manual: ${record.correction_reason || "Alasan tidak tersedia"}`
+          : "-"
+      ));
       tr.appendChild(
         createCell(
           Number.isFinite(Number(record.distance_m))
@@ -371,10 +376,7 @@
 
       showRecap();
       await loadAttendance();
-      
-      window.alert(
-        result.message || "Koreksi kehadiran berhasil dicatat."
-      );
+      window.alert(result.message || "Koreksi kehadiran berhasil dicatat beserta alasan dan identitas admin.");
     } catch (error) {
       showMessage(correctionMessage, error instanceof Error ? error.message : "Koreksi gagal disimpan.", "error");
     } finally {
