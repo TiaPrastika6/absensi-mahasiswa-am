@@ -452,6 +452,7 @@
       ["Program Studi", "study_program"],
       ["Sesi", "session"],
       ["Jenis absensi", "attendance_type"],
+      ["Keterangan Koreksi", "correction_reason"],
       ["Latitude", "latitude"],
       ["Longitude", "longitude"],
       ["Akurasi GPS (m)", "accuracy_m"],
