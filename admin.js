@@ -355,11 +355,27 @@
         body: JSON.stringify({ action: "correct_arrival", full_name: fullName, study_program: studyProgram, attendance_date: attendanceDate, session, reason })
       });
       const result = await response.json().catch(() => ({}));
-      if (!response.ok || !result.success) throw new Error(result.error || "Koreksi gagal disimpan.");
-      showMessage(correctionMessage, result.message || "Koreksi Datang berhasil dicatat.", "success");
+      if (!response.ok || !result.success) {
+        const detail = result.detail ? ` Detail: ${result.detail}` : "";
+        const code = result.code ? ` (Kode: ${result.code})` : "";
+        throw new Error((result.error || "Koreksi gagal disimpan.") + detail + code);
+      }
+
       correctionForm.reset();
-      correctionDate.value = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Makassar", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+      correctionDate.value = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Makassar",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).format(new Date());
+
+      showRecap();
       await loadAttendance();
+      showMessage(
+        dashboardMessage,
+        result.message || "Koreksi kehadiran berhasil dicatat.",
+        "success"
+      );
     } catch (error) {
       showMessage(correctionMessage, error instanceof Error ? error.message : "Koreksi gagal disimpan.", "error");
     } finally {
