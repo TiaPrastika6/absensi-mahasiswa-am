@@ -5,6 +5,18 @@
 
   const loginPanel = document.getElementById("loginPanel");
   const dashboardPanel = document.getElementById("dashboardPanel");
+  const correctionPanel = document.getElementById("correctionPanel");
+  const openCorrectionButton = document.getElementById("openCorrectionButton");
+  const backToRecapButton = document.getElementById("backToRecapButton");
+  const cancelCorrectionButton = document.getElementById("cancelCorrectionButton");
+  const correctionForm = document.getElementById("correctionForm");
+  const correctionMessage = document.getElementById("correctionMessage");
+  const correctionName = document.getElementById("correctionName");
+  const correctionProgram = document.getElementById("correctionProgram");
+  const correctionDate = document.getElementById("correctionDate");
+  const correctionSession = document.getElementById("correctionSession");
+  const correctionReason = document.getElementById("correctionReason");
+  const correctionButton = document.getElementById("correctionButton");
   const loginForm = document.getElementById("loginForm");
   const emailInput = document.getElementById("email");
   const passwordInput = document.getElementById("password");
@@ -13,13 +25,6 @@
   const loginMessage = document.getElementById("loginMessage");
   const dashboardMessage = document.getElementById("dashboardMessage");
   const filterName = document.getElementById("filterName");
-  const correctionForm = document.getElementById("correctionForm");
-  const correctionName = document.getElementById("correctionName");
-  const correctionProgram = document.getElementById("correctionProgram");
-  const correctionDate = document.getElementById("correctionDate");
-  const correctionSession = document.getElementById("correctionSession");
-  const correctionReason = document.getElementById("correctionReason");
-  const correctionButton = document.getElementById("correctionButton");
   const filterDate = document.getElementById("filterDate");
   const filterSession = document.getElementById("filterSession");
   const filterType = document.getElementById("filterType");
@@ -47,6 +52,19 @@
   function setLoggedIn(isLoggedIn) {
     loginPanel.classList.toggle("hidden", isLoggedIn);
     dashboardPanel.classList.toggle("hidden", !isLoggedIn);
+    if (!isLoggedIn) correctionPanel.classList.add("hidden");
+  }
+
+  function showRecap() {
+    correctionPanel.classList.add("hidden");
+    dashboardPanel.classList.remove("hidden");
+  }
+
+  function showCorrection() {
+    hideMessage(dashboardMessage);
+    hideMessage(correctionMessage);
+    dashboardPanel.classList.add("hidden");
+    correctionPanel.classList.remove("hidden");
   }
 
   function setBusy(value) {
@@ -300,14 +318,14 @@
     }
   }
 
-  if (correctionDate) {
-    const now = new Date();
-    const witaDate = new Date(now.getTime() + (8 * 60 + 0) * 60000 - now.getTimezoneOffset() * 60000);
-    correctionDate.value = witaDate.toISOString().slice(0, 10);
-  }
+  correctionDate.value = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Makassar", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+  openCorrectionButton.addEventListener("click", showCorrection);
+  backToRecapButton.addEventListener("click", showRecap);
+  cancelCorrectionButton.addEventListener("click", showRecap);
 
-  correctionForm?.addEventListener("submit", async event => {
+  correctionForm.addEventListener("submit", async event => {
     event.preventDefault();
+    hideMessage(correctionMessage);
     if (busy) return;
     const fullName = correctionName.value.trim().replace(/\s+/g, " ");
     const studyProgram = correctionProgram.value;
@@ -315,13 +333,12 @@
     const session = correctionSession.value;
     const reason = correctionReason.value.trim();
     if (fullName.length < 2 || !studyProgram || !attendanceDate || !session || reason.length < 8) {
-      showMessage(dashboardMessage, "Lengkapi identitas, tanggal, sesi, dan alasan koreksi minimal 8 karakter.", "error");
+      showMessage(correctionMessage, "Lengkapi seluruh data dan alasan minimal 8 karakter.", "error");
       return;
     }
     if (!window.confirm(`Pastikan kehadiran sudah diverifikasi. Catat koreksi Datang?\n\nNama: ${fullName}\nProdi: ${studyProgram}\nTanggal: ${attendanceDate}\nSesi: ${session}\nAlasan: ${reason}`)) return;
-    hideMessage(dashboardMessage);
-    setBusy(true);
     correctionButton.disabled = true;
+    correctionButton.textContent = "Menyimpan...";
     try {
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !sessionData.session) throw new Error("Sesi login berakhir. Silakan login kembali.");
@@ -332,14 +349,15 @@
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok || !result.success) throw new Error(result.error || "Koreksi gagal disimpan.");
-      showMessage(dashboardMessage, result.message || "Koreksi berhasil dicatat.", "success");
+      showMessage(correctionMessage, result.message || "Koreksi Datang berhasil dicatat.", "success");
       correctionForm.reset();
+      correctionDate.value = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Makassar", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
       await loadAttendance();
     } catch (error) {
-      showMessage(dashboardMessage, error instanceof Error ? error.message : "Koreksi gagal disimpan.", "error");
+      showMessage(correctionMessage, error instanceof Error ? error.message : "Koreksi gagal disimpan.", "error");
     } finally {
-      setBusy(false);
       correctionButton.disabled = false;
+      correctionButton.textContent = "Catat Koreksi Datang";
     }
   });
 
