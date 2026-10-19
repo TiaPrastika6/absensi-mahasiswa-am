@@ -371,10 +371,9 @@
 
       showRecap();
       await loadAttendance();
-      showMessage(
-        dashboardMessage,
-        result.message || "Koreksi kehadiran berhasil dicatat.",
-        "success"
+      
+      window.alert(
+        result.message || "Koreksi kehadiran berhasil dicatat."
       );
     } catch (error) {
       showMessage(correctionMessage, error instanceof Error ? error.message : "Koreksi gagal disimpan.", "error");
