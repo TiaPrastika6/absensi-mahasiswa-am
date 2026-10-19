@@ -97,6 +97,21 @@
       <div id="dashboardMessage" class="admin-message hidden" role="status"></div>
       <p id="summary" class="summary">Belum ada data yang dimuat.</p>
 
+      <section class="admin-panel" aria-labelledby="correctionTitle">
+        <h3 id="correctionTitle">Koreksi Absensi Datang</h3>
+        <p>Gunakan hanya setelah kehadiran mahasiswa diverifikasi. Koreksi manual dicatat terpisah dari absensi normal dan tidak memiliki foto/GPS asli.</p>
+        <form id="correctionForm" class="admin-form">
+          <div class="filter-grid">
+            <div><label for="correctionName">Nama lengkap</label><input id="correctionName" required maxlength="100" placeholder="Nama mahasiswa"></div>
+            <div><label for="correctionProgram">Program studi</label><select id="correctionProgram" required><option value="">Pilih program studi</option><option>BK</option><option>PBSI</option><option>PBI</option><option>PBB</option><option>PM</option><option>PTI</option><option>PJKR</option></select></div>
+            <div><label for="correctionDate">Tanggal hadir</label><input id="correctionDate" type="date" required></div>
+            <div><label for="correctionSession">Sesi</label><select id="correctionSession" required><option value="">Pilih sesi</option><option>Pagi</option><option>Siang</option></select></div>
+          </div>
+          <div><label for="correctionReason">Alasan koreksi</label><textarea id="correctionReason" rows="2" minlength="8" maxlength="500" required placeholder="Jelaskan alasan dan bagaimana kehadiran diverifikasi"></textarea></div>
+          <button id="correctionButton" class="admin-button secondary" type="submit">Catat Koreksi Datang</button>
+        </form>
+      </section>
+
       <div class="table-wrap">
         <table class="attendance-table">
           <thead>
