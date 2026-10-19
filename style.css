@@ -1007,3 +1007,73 @@ input[type="file"]::file-selector-button:hover {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+
+/* Konfirmasi sukses absensi: dibuat besar dan jelas di layar ponsel */
+.attendance-success {
+  margin-top: 18px;
+  padding: 26px 20px;
+  border: 2px solid #86cda9;
+  border-radius: 16px;
+  background: #f0fbf5;
+  color: #164b32;
+  text-align: center;
+}
+.attendance-success[hidden] { display: none !important; }
+.success-check {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: #16834b;
+  color: #fff;
+  font-size: 48px;
+  font-weight: 800;
+}
+.success-eyebrow { margin: 0 0 8px; font-size: 14px; font-weight: 800; letter-spacing: .08em; }
+.attendance-success h2 { margin: 0 auto 10px; font-size: clamp(24px, 5vw, 32px); line-height: 1.25; }
+.success-lead { margin: 0 0 20px; font-size: 18px; line-height: 1.5; }
+.success-details { margin: 0; padding: 0; text-align: left; }
+.success-details div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid #c9e7d6; }
+.success-details dt { color: #38624b; font-weight: 600; }
+.success-details dd { margin: 0; text-align: right; font-weight: 750; overflow-wrap: anywhere; }
+.success-reminder { margin: 20px 0 0; padding: 14px; border-radius: 10px; background: #dff5e8; font-size: 17px; line-height: 1.55; font-weight: 750; }
+@media (max-width: 480px) {
+  .attendance-success { padding: 22px 15px; }
+  .success-details div { gap: 10px; }
+  .success-details dt, .success-details dd { font-size: 15px; }
+}
+
+
+/* Konfirmasi berhasil tampil sebagai halaman terpisah */
+.attendance-success {
+  margin: 22px auto;
+  width: 100%;
+  max-width: 760px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 2px solid #b7e4c7;
+  border-radius: 20px;
+  box-shadow: 0 10px 28px rgba(18, 75, 50, 0.10);
+}
+.attendance-success[hidden] { display: none !important; }
+.welcome[hidden], .help-card[hidden] { display: none !important; }
+
+/* Status lokasi berubah hijau setelah pemeriksaan berhasil */
+.location-panel.location-verified {
+  background: #ecfdf3;
+  border-color: #22a06b;
+  color: #14532d;
+}
+.location-panel.location-verified .location-icon { color: #16834a; }
+.location-panel.location-verified #locationStatus {
+  color: #166534;
+  font-weight: 600;
+}
+.location-verified-button {
+  background: #16834a !important;
+  color: #ffffff !important;
+  border-color: #16834a !important;
+}
