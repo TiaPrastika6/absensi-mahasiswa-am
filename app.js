@@ -34,6 +34,11 @@
   const attendanceCard = document.getElementById("attendanceCard");
   const scheduleClosed = document.getElementById("scheduleClosed");
   const scheduleMessage = document.getElementById("scheduleMessage");
+  const attendanceForm = document.getElementById("attendanceForm");
+  const successPanel = document.getElementById("successPanel");
+  const cardHeading = attendanceCard.querySelector(".card-heading");
+  const welcomePanel = document.querySelector(".welcome");
+  const helpCards = document.querySelectorAll("main > .help-card");
 
   function updateScheduleVisibility() {
     const parts = new Intl.DateTimeFormat("en-GB", {
@@ -56,7 +61,8 @@
       { start: 6 * 3600, end: 7 * 3600 },
       { start: 12 * 3600, end: 13 * 3600 },
       { start: 11 * 3600, end: 12 * 3600 },
-      { start: 17 * 3600, end: 18 * 3600 }
+      { start: 17 * 3600, end: 18 * 3600 },
+      { start: 8 * 3600 + 30 * 60, end: 9 * 3600 + 30 * 60 }
     ];
 
     const isOpen = windows.some(
@@ -76,7 +82,8 @@
     if (!isOpen) {
       scheduleMessage.textContent =
         "Saat ini tidak ada jadwal presensi yang dibuka. " +
-        "Formulir akan tersedia otomatis ketika jadwal berikutnya dimulai.";
+        "Formulir akan tersedia otomatis ketika jadwal berikutnya dimulai. " +
+        "Khusus PJKR, absen Datang sesi Pagi pada Selasa–Jumat dibuka pukul 08.30–09.30 WITA.";
     }
   }
 
@@ -90,6 +97,8 @@
     formMessage.textContent = message;
     formMessage.className = `message ${type}`;
     formMessage.hidden = false;
+    // Popup supaya pesan error mudah terlihat di layar HP.
+    if (type === "error") window.alert(message);
   }
 
   function clearMessage() {
@@ -147,6 +156,7 @@
     clearMessage();
     checkLocationButton.disabled = true;
     locationStatus.textContent = "Sedang memeriksa lokasi GPS...";
+    document.querySelector(".location-panel").classList.remove("location-verified");
 
     try {
       const position = await getCurrentLocation();
@@ -161,6 +171,9 @@
 
       if (accuracy > config.SCHOOL.MAX_GPS_ACCURACY_METERS) {
         currentLocation = null;
+        checkLocationButton.hidden = false;
+        checkLocationButton.textContent = "Periksa Lokasi GPS";
+        document.querySelector(".location-panel").classList.remove("location-verified");
         locationStatus.textContent =
           `Akurasi GPS ${Math.round(accuracy)} m. Maksimal 100 m.`;
         showMessage(
@@ -172,6 +185,9 @@
 
       if (distance > config.SCHOOL.RADIUS_METERS) {
         currentLocation = null;
+        checkLocationButton.hidden = false;
+        checkLocationButton.textContent = "Periksa Lokasi GPS";
+        document.querySelector(".location-panel").classList.remove("location-verified");
         locationStatus.textContent =
           `Jarak dari titik sekolah sekitar ${Math.round(distance)} m.`;
         showMessage(
@@ -191,9 +207,18 @@
         `Lokasi terdeteksi. Jarak sekitar ${Math.round(distance)} m, ` +
         `akurasi GPS ${Math.round(accuracy)} m.`;
 
-      showMessage("Lokasi memenuhi batas pemeriksaan awal.", "success");
+      const locationPanel = document.querySelector(".location-panel");
+      locationPanel.classList.add("location-verified");
+      checkLocationButton.textContent = "✓ Lokasi berhasil diperiksa";
+      checkLocationButton.classList.add("location-verified-button");
+      checkLocationButton.hidden = true;
+      showMessage("Lokasi berhasil diperiksa dan memenuhi batas absensi.", "success");
     } catch (error) {
       currentLocation = null;
+      checkLocationButton.hidden = false;
+      checkLocationButton.textContent = "Periksa Lokasi GPS";
+      checkLocationButton.classList.remove("location-verified-button");
+      document.querySelector(".location-panel").classList.remove("location-verified");
       locationStatus.textContent = error.message;
       showMessage(error.message, "error");
     } finally {
@@ -414,6 +439,10 @@ async function compressPhoto(file) {
       }
 
       currentLocation = { latitude, longitude, accuracy };
+      document.querySelector(".location-panel").classList.add("location-verified");
+      checkLocationButton.hidden = true;
+      checkLocationButton.textContent = "✓ Lokasi berhasil diperiksa";
+      checkLocationButton.classList.add("location-verified-button");
 
       showMessage("Sedang memproses foto...", "info");
       const compressedPhoto = await compressPhoto(photoFile);
@@ -449,21 +478,42 @@ async function compressPhoto(file) {
         );
       }
 
-      showMessage(
-        `${result.message} Simpan informasi ini sebagai konfirmasi absensi kamu.`,
-        "success"
-      );
+      // Tampilkan konfirmasi besar agar mahasiswa tidak mengirim absensi dua kali.
+      document.getElementById("successTitle").textContent = `Absen ${attendanceType} berhasil tersimpan!`;
+      document.getElementById("successName").textContent = fullName;
+      document.getElementById("successProgram").textContent = studyProgram;
+      document.getElementById("successSession").textContent = session;
+      document.getElementById("successType").textContent = attendanceType;
+      const recordedAt = result.attendance?.created_at || new Date().toISOString();
+      document.getElementById("successTime").textContent = new Intl.DateTimeFormat("id-ID", {
+        dateStyle: "full", timeStyle: "medium", timeZone: "Asia/Makassar"
+      }).format(new Date(recordedAt)) + " WITA";
+      clearMessage();
+      attendanceForm.hidden = true;
+      successPanel.hidden = false;
+      attendanceCard.hidden = true;
+      scheduleClosed.hidden = true;
+      if (welcomePanel) welcomePanel.hidden = true;
+      helpCards.forEach(card => { card.hidden = true; });
+      document.body.classList.add("attendance-completed");
+      successPanel.scrollIntoView({ behavior: "smooth", block: "start" });
 
-      // Jangan hapus identitas atau foto otomatis sebelum pengguna melihat hasil.
+      // Bersihkan foto setelah server mengonfirmasi data tersimpan.
       photoInput.value = "";
       resetPhotoPreview();
     } catch (error) {
-      showMessage(
-        error instanceof Error
-          ? error.message
-          : "Terjadi kesalahan. Silakan coba lagi.",
-        "error"
-      );
+      const errorMessage = error instanceof Error
+        ? error.message
+        : "Terjadi kesalahan. Silakan coba lagi.";
+      if (/GPS|lokasi|radius|meter|Izin lokasi/i.test(errorMessage)) {
+        currentLocation = null;
+        checkLocationButton.hidden = false;
+        checkLocationButton.textContent = "Periksa Lokasi GPS";
+        checkLocationButton.classList.remove("location-verified-button");
+        document.querySelector(".location-panel").classList.remove("location-verified");
+        locationStatus.textContent = errorMessage;
+      }
+      showMessage(errorMessage, "error");
     } finally {
       isSubmitting = false;
       submitButton.disabled = false;
