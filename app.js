@@ -40,37 +40,108 @@
   const welcomePanel = document.querySelector(".welcome");
   const helpCards = document.querySelectorAll("main > .help-card");
 
-  function updateScheduleVisibility() {
-    const parts = new Intl.DateTimeFormat("en-GB", {
+  let scheduleCache = { weekly: [], special: [] };
+  let scheduleLastLoaded = 0;
+
+  function timeToSeconds(value) {
+    const match = String(value || "").match(/^(\d{2}):(\d{2})/);
+    return match ? Number(match[1]) * 3600 + Number(match[2]) * 60 : null;
+  }
+
+  function getBaliDateParts() {
+    const parts = new Intl.DateTimeFormat("en-CA", {
       timeZone: "Asia/Makassar",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hourCycle: "h23"
+      year: "numeric", month: "2-digit", day: "2-digit",
+      weekday: "short", hour: "2-digit", minute: "2-digit",
+      second: "2-digit", hourCycle: "h23"
     }).formatToParts(new Date());
+    const get = type => parts.find(item => item.type === type)?.value || "";
+    const weekdays = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+    return {
+      date: `${get("year")}-${get("month")}-${get("day")}`,
+      weekday: weekdays[get("weekday")],
+      seconds: Number(get("hour")) * 3600 + Number(get("minute")) * 60 + Number(get("second"))
+    };
+  }
 
-    const getPart = type =>
-      Number(parts.find(item => item.type === type)?.value ?? 0);
+  async function refreshPublicSchedule() {
+    const now = Date.now();
+    if (now - scheduleLastLoaded < 15000) return;
+    scheduleLastLoaded = now;
+    try {
+      const response = await fetch(`${config.SUPABASE_URL}/functions/v1/attendance-schedule`, {
+        method: "GET",
+        headers: { apikey: config.SUPABASE_PUBLISHABLE_KEY }
+      });
+      const result = await response.json();
+      if (response.ok && result.success) {
+        scheduleCache = { weekly: result.weekly || [], special: result.special || [] };
+      }
+    } catch (error) {
+      console.warn("Jadwal dari server belum dapat dimuat; gunakan fallback jadwal reguler.", error);
+    }
+  }
 
-    const now =
-      getPart("hour") * 3600 +
-      getPart("minute") * 60 +
-      getPart("second");
-
-    const windows = [
-      { start: 6 * 3600, end: 7 * 3600 },
-      { start: 12 * 3600, end: 13 * 3600 },
-      { start: 11 * 3600, end: 12 * 3600 },
-      { start: 17 * 3600, end: 18 * 3600 },
-      { start: 8 * 3600 + 30 * 60, end: 9 * 3600 + 30 * 60 }
-    ];
-
+  async function updateScheduleVisibility() {
+    await refreshPublicSchedule();
+    const current = getBaliDateParts();
     const isLocalPreview =
       ["127.0.0.1", "localhost"].includes(window.location.hostname) &&
       new URLSearchParams(window.location.search).get("preview") === "1";
 
+    // Simpan jenis dan sesi agar jadwal khusus dapat menggantikan jam Pulang yang tepat.
+    let activeRows = scheduleCache.weekly
+      .filter(row => Number(row.weekday) === current.weekday);
+
+    const specialToday = scheduleCache.special.filter(row => row.attendance_date === current.date);
+    if (specialToday.length) {
+      const replacedSessions = new Set(specialToday.map(row => row.session));
+      activeRows = activeRows.filter(row =>
+        !(row.attendance_type === "Pulang" && replacedSessions.has(row.session))
+      );
+      for (const row of specialToday) {
+        activeRows.push({
+          session: row.session,
+          attendance_type: "Pulang",
+          start_time: row.start_time,
+          end_time: row.end_time
+        });
+      }
+    }
+
+    let windows = activeRows
+      .map(row => ({ start: timeToSeconds(row.start_time), end: timeToSeconds(row.end_time) }))
+      .filter(row => row.start !== null && row.end !== null);
+
+    // PJKR: Datang sesi Pagi Selasa–Jumat pukul 08.30–09.30 WITA.
+    if (current.weekday >= 2 && current.weekday <= 5) {
+      windows.push({ start: 8 * 3600 + 30 * 60, end: 9 * 3600 + 30 * 60 });
+    }
+
+    // Fallback jika endpoint jadwal belum dapat diakses.
+    if (!scheduleCache.weekly.length) {
+      windows = [
+        { start: 6 * 3600, end: 7 * 3600 },
+        { start: 12 * 3600, end: 13 * 3600 },
+        { start: 11 * 3600, end: 12 * 3600 },
+        { start: 17 * 3600, end: 18 * 3600 }
+      ];
+      if (current.weekday === 6) {
+        windows = [
+          { start: 6 * 3600, end: 7 * 3600 },
+          { start: 11 * 3600, end: 12 * 3600 },
+          { start: 10 * 3600, end: 11 * 3600 },
+          { start: 14 * 3600, end: 15 * 3600 }
+        ];
+      }
+      if (current.weekday >= 2 && current.weekday <= 5) {
+        windows.push({ start: 8 * 3600 + 30 * 60, end: 9 * 3600 + 30 * 60 });
+      }
+    }
+
     const isOpen = isLocalPreview || windows.some(
-      window => now >= window.start && now < window.end
+      window => window.start !== null && window.end !== null &&
+        current.seconds >= window.start && current.seconds < window.end
     );
 
     attendanceCard.hidden = !isOpen;
@@ -78,17 +149,12 @@
 
     if (!isOpen) {
       scheduleMessage.textContent =
-        "Saat ini tidak ada jadwal presensi yang dibuka. " +
-        "Formulir akan tersedia otomatis ketika jadwal berikutnya dimulai. " +
-        "Khusus PJKR, absen Datang sesi Pagi pada Selasa–Jumat dibuka pukul 08.30–09.30 WITA.";
+        "Saat ini tidak ada jadwal presensi yang dibuka. Formulir akan tersedia otomatis ketika jadwal berikutnya dimulai. Semua jam menggunakan WITA.";
     }
   }
 
   updateScheduleVisibility();
-
-  // Periksa jadwal kembali setiap 15 detik tanpa perlu refresh.
   setInterval(updateScheduleVisibility, 15000);
-
 
   function showMessage(message, type = "info") {
     formMessage.textContent = message;
