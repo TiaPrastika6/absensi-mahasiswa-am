@@ -161,11 +161,11 @@
 
       <hr>
       <h3>Jadwal Pulang khusus</h3>
-      <p>Jadwal ini menggantikan jam Pulang reguler untuk tanggal dan sesi yang dipilih saja.</p>
+      <p>Jadwal ini menggantikan jam Pulang reguler untuk tanggal dan sesi yang dipilih. Pilih Semua Sesi jika jadwal berlaku untuk mahasiswa sesi pagi dan siang.</p>
       <form id="specialScheduleForm" class="admin-form">
         <div class="correction-fields">
           <div><label for="specialDate">Tanggal</label><input id="specialDate" type="date" required></div>
-          <div><label for="specialSession">Sesi</label><select id="specialSession" required><option value="Pagi">Pagi</option><option value="Siang">Siang</option></select></div>
+          <div><label for="specialSession">Sesi</label><select id="specialSession" required><option value="Pagi">Pagi</option><option value="Siang">Siang</option><option value="Semua">Semua Sesi (Pagi + Siang)</option></select></div>
           <div><label for="specialStart">Jam mulai Pulang</label><input id="specialStart" type="time" required></div>
           <div><label for="specialEnd">Jam selesai Pulang</label><input id="specialEnd" type="time" required></div>
         </div>
