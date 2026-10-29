@@ -33,6 +33,19 @@
   const exportButton = document.getElementById("exportButton");
   const attendanceRows = document.getElementById("attendanceRows");
   const summary = document.getElementById("summary");
+  const schedulePanel = document.getElementById("schedulePanel");
+  const openScheduleButton = document.getElementById("openScheduleButton");
+  const backFromScheduleButton = document.getElementById("backFromScheduleButton");
+  const scheduleMessage = document.getElementById("scheduleMessage");
+  const weeklyScheduleForm = document.getElementById("weeklyScheduleForm");
+  const weeklyDay = document.getElementById("weeklyDay");
+  const specialScheduleForm = document.getElementById("specialScheduleForm");
+  const specialDate = document.getElementById("specialDate");
+  const specialSession = document.getElementById("specialSession");
+  const specialStart = document.getElementById("specialStart");
+  const specialEnd = document.getElementById("specialEnd");
+  const specialReason = document.getElementById("specialReason");
+  const specialScheduleRows = document.getElementById("specialScheduleRows");
 
   let supabase = null;
   let currentRecords = [];
@@ -52,12 +65,25 @@
   function setLoggedIn(isLoggedIn) {
     loginPanel.classList.toggle("hidden", isLoggedIn);
     dashboardPanel.classList.toggle("hidden", !isLoggedIn);
-    if (!isLoggedIn) correctionPanel.classList.add("hidden");
+    if (!isLoggedIn) {
+      correctionPanel.classList.add("hidden");
+      schedulePanel?.classList.add("hidden");
+    }
   }
 
   function showRecap() {
     correctionPanel.classList.add("hidden");
+    schedulePanel?.classList.add("hidden");
     dashboardPanel.classList.remove("hidden");
+  }
+
+  function showSchedule() {
+    hideMessage(dashboardMessage);
+    hideMessage(scheduleMessage);
+    dashboardPanel.classList.add("hidden");
+    correctionPanel.classList.add("hidden");
+    schedulePanel.classList.remove("hidden");
+    loadScheduleSettings();
   }
 
   function showCorrection() {
@@ -323,6 +349,156 @@
     }
   }
 
+
+  const dayLabels = { "0": "Minggu", "1": "Senin", "2": "Selasa", "3": "Rabu", "4": "Kamis", "5": "Jumat", "6": "Sabtu" };
+  const weeklyFields = {
+    Pagi_Datang: ["weeklyPagiDatangStart", "weeklyPagiDatangEnd"],
+    Pagi_Pulang: ["weeklyPagiPulangStart", "weeklyPagiPulangEnd"],
+    Siang_Datang: ["weeklySiangDatangStart", "weeklySiangDatangEnd"],
+    Siang_Pulang: ["weeklySiangPulangStart", "weeklySiangPulangEnd"]
+  };
+
+  async function scheduleRequest(action, payload = {}) {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session) throw new Error("Sesi login berakhir. Silakan login kembali.");
+    const response = await fetch(`${config.SUPABASE_URL}/functions/v1/manage-attendance-schedule`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: config.SUPABASE_PUBLISHABLE_KEY,
+        Authorization: `Bearer ${sessionData.session.access_token}`
+      },
+      body: JSON.stringify({ action, ...payload })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.success) throw new Error(result.error || "Gagal memproses pengaturan jadwal.");
+    return result;
+  }
+
+  function setWeeklyForm(dayRows) {
+    const byKey = new Map((dayRows || []).map(row => [`${row.session}_${row.attendance_type}`, row]));
+    for (const [key, ids] of Object.entries(weeklyFields)) {
+      const row = byKey.get(key);
+      document.getElementById(ids[0]).value = row?.start_time || "";
+      document.getElementById(ids[1]).value = row?.end_time || "";
+    }
+  }
+
+  async function loadScheduleSettings() {
+    try {
+      const result = await scheduleRequest("get_all");
+      const selectedDay = weeklyDay.value || "1";
+      setWeeklyForm((result.weekly || []).filter(row => String(row.weekday) === String(selectedDay)));
+      renderSpecialSchedules(result.special || []);
+      hideMessage(scheduleMessage);
+    } catch (error) {
+      showMessage(scheduleMessage, error instanceof Error ? error.message : "Gagal memuat jadwal.", "error");
+    }
+  }
+
+  function renderSpecialSchedules(rows) {
+    specialScheduleRows.replaceChildren();
+    if (!rows.length) {
+      const tr = document.createElement("tr");
+      const td = createCell("Belum ada jadwal khusus.");
+      td.colSpan = 5;
+      tr.appendChild(td);
+      specialScheduleRows.appendChild(tr);
+      return;
+    }
+    for (const row of rows) {
+      const tr = document.createElement("tr");
+      tr.appendChild(createCell(row.attendance_date));
+      tr.appendChild(createCell(row.session));
+      tr.appendChild(createCell(`${String(row.start_time).slice(0,5)}–${String(row.end_time).slice(0,5)}`));
+      tr.appendChild(createCell(row.reason || "-"));
+      const td = document.createElement("td");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "delete-attendance-button";
+      button.textContent = "Hapus";
+      button.addEventListener("click", async () => {
+        if (!window.confirm(`Hapus jadwal khusus ${row.attendance_date}, sesi ${row.session}? Jadwal mingguan akan berlaku kembali.`)) return;
+        try {
+          await scheduleRequest("delete_special", { id: row.id });
+          showMessage(scheduleMessage, "Jadwal khusus dihapus. Jadwal mingguan akan berlaku kembali.", "success");
+          await loadScheduleSettings();
+        } catch (error) {
+          showMessage(scheduleMessage, error instanceof Error ? error.message : "Gagal menghapus jadwal.", "error");
+        }
+      });
+      td.appendChild(button);
+      tr.appendChild(td);
+      specialScheduleRows.appendChild(tr);
+    }
+  }
+
+  weeklyDay?.addEventListener("change", async () => {
+    try {
+      const result = await scheduleRequest("get_all");
+      setWeeklyForm((result.weekly || []).filter(row => String(row.weekday) === String(weeklyDay.value)));
+    } catch (error) {
+      showMessage(scheduleMessage, error instanceof Error ? error.message : "Gagal memuat jadwal hari.", "error");
+    }
+  });
+
+  weeklyScheduleForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+    hideMessage(scheduleMessage);
+    const rows = [];
+    for (const [key, ids] of Object.entries(weeklyFields)) {
+      const [session, attendance_type] = key.split("_");
+      rows.push({
+        weekday: Number(weeklyDay.value),
+        session,
+        attendance_type,
+        start_time: document.getElementById(ids[0]).value,
+        end_time: document.getElementById(ids[1]).value
+      });
+    }
+    const button = document.getElementById("saveWeeklyScheduleButton");
+    button.disabled = true;
+    try {
+      await scheduleRequest("save_weekly", { rows });
+      showMessage(scheduleMessage, `Jadwal ${dayLabels[weeklyDay.value]} berhasil disimpan.`, "success");
+    } catch (error) {
+      showMessage(scheduleMessage, error instanceof Error ? error.message : "Gagal menyimpan jadwal mingguan.", "error");
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  specialScheduleForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+    hideMessage(scheduleMessage);
+    if (specialStart.value >= specialEnd.value) {
+      showMessage(scheduleMessage, "Jam selesai harus lebih akhir daripada jam mulai.", "error");
+      return;
+    }
+    const button = document.getElementById("saveSpecialScheduleButton");
+    button.disabled = true;
+    try {
+      await scheduleRequest("save_special", {
+        attendance_date: specialDate.value,
+        session: specialSession.value,
+        start_time: specialStart.value,
+        end_time: specialEnd.value,
+        reason: specialReason.value.trim()
+      });
+      showMessage(scheduleMessage, "Jadwal Pulang khusus berhasil disimpan.", "success");
+      specialScheduleForm.reset();
+      await loadScheduleSettings();
+    } catch (error) {
+      showMessage(scheduleMessage, error instanceof Error ? error.message : "Gagal menyimpan jadwal khusus.", "error");
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  openScheduleButton?.addEventListener("click", showSchedule);
+  backFromScheduleButton?.addEventListener("click", showRecap);
+  specialDate.value = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Makassar", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+
   correctionDate.value = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Makassar", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
   openCorrectionButton.addEventListener("click", showCorrection);
   backToRecapButton.addEventListener("click", showRecap);
@@ -367,7 +543,157 @@
       }
 
       correctionForm.reset();
-      correctionDate.value = new Intl.DateTimeFormat("en-CA", {
+    
+  const dayLabels = { "0": "Minggu", "1": "Senin", "2": "Selasa", "3": "Rabu", "4": "Kamis", "5": "Jumat", "6": "Sabtu" };
+  const weeklyFields = {
+    Pagi_Datang: ["weeklyPagiDatangStart", "weeklyPagiDatangEnd"],
+    Pagi_Pulang: ["weeklyPagiPulangStart", "weeklyPagiPulangEnd"],
+    Siang_Datang: ["weeklySiangDatangStart", "weeklySiangDatangEnd"],
+    Siang_Pulang: ["weeklySiangPulangStart", "weeklySiangPulangEnd"]
+  };
+
+  async function scheduleRequest(action, payload = {}) {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session) throw new Error("Sesi login berakhir. Silakan login kembali.");
+    const response = await fetch(`${config.SUPABASE_URL}/functions/v1/manage-attendance-schedule`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: config.SUPABASE_PUBLISHABLE_KEY,
+        Authorization: `Bearer ${sessionData.session.access_token}`
+      },
+      body: JSON.stringify({ action, ...payload })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.success) throw new Error(result.error || "Gagal memproses pengaturan jadwal.");
+    return result;
+  }
+
+  function setWeeklyForm(dayRows) {
+    const byKey = new Map((dayRows || []).map(row => [`${row.session}_${row.attendance_type}`, row]));
+    for (const [key, ids] of Object.entries(weeklyFields)) {
+      const row = byKey.get(key);
+      document.getElementById(ids[0]).value = row?.start_time || "";
+      document.getElementById(ids[1]).value = row?.end_time || "";
+    }
+  }
+
+  async function loadScheduleSettings() {
+    try {
+      const result = await scheduleRequest("get_all");
+      const selectedDay = weeklyDay.value || "1";
+      setWeeklyForm((result.weekly || []).filter(row => String(row.weekday) === String(selectedDay)));
+      renderSpecialSchedules(result.special || []);
+      hideMessage(scheduleMessage);
+    } catch (error) {
+      showMessage(scheduleMessage, error instanceof Error ? error.message : "Gagal memuat jadwal.", "error");
+    }
+  }
+
+  function renderSpecialSchedules(rows) {
+    specialScheduleRows.replaceChildren();
+    if (!rows.length) {
+      const tr = document.createElement("tr");
+      const td = createCell("Belum ada jadwal khusus.");
+      td.colSpan = 5;
+      tr.appendChild(td);
+      specialScheduleRows.appendChild(tr);
+      return;
+    }
+    for (const row of rows) {
+      const tr = document.createElement("tr");
+      tr.appendChild(createCell(row.attendance_date));
+      tr.appendChild(createCell(row.session));
+      tr.appendChild(createCell(`${String(row.start_time).slice(0,5)}–${String(row.end_time).slice(0,5)}`));
+      tr.appendChild(createCell(row.reason || "-"));
+      const td = document.createElement("td");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "delete-attendance-button";
+      button.textContent = "Hapus";
+      button.addEventListener("click", async () => {
+        if (!window.confirm(`Hapus jadwal khusus ${row.attendance_date}, sesi ${row.session}? Jadwal mingguan akan berlaku kembali.`)) return;
+        try {
+          await scheduleRequest("delete_special", { id: row.id });
+          showMessage(scheduleMessage, "Jadwal khusus dihapus. Jadwal mingguan akan berlaku kembali.", "success");
+          await loadScheduleSettings();
+        } catch (error) {
+          showMessage(scheduleMessage, error instanceof Error ? error.message : "Gagal menghapus jadwal.", "error");
+        }
+      });
+      td.appendChild(button);
+      tr.appendChild(td);
+      specialScheduleRows.appendChild(tr);
+    }
+  }
+
+  weeklyDay?.addEventListener("change", async () => {
+    try {
+      const result = await scheduleRequest("get_all");
+      setWeeklyForm((result.weekly || []).filter(row => String(row.weekday) === String(weeklyDay.value)));
+    } catch (error) {
+      showMessage(scheduleMessage, error instanceof Error ? error.message : "Gagal memuat jadwal hari.", "error");
+    }
+  });
+
+  weeklyScheduleForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+    hideMessage(scheduleMessage);
+    const rows = [];
+    for (const [key, ids] of Object.entries(weeklyFields)) {
+      const [session, attendance_type] = key.split("_");
+      rows.push({
+        weekday: Number(weeklyDay.value),
+        session,
+        attendance_type,
+        start_time: document.getElementById(ids[0]).value,
+        end_time: document.getElementById(ids[1]).value
+      });
+    }
+    const button = document.getElementById("saveWeeklyScheduleButton");
+    button.disabled = true;
+    try {
+      await scheduleRequest("save_weekly", { rows });
+      showMessage(scheduleMessage, `Jadwal ${dayLabels[weeklyDay.value]} berhasil disimpan.`, "success");
+    } catch (error) {
+      showMessage(scheduleMessage, error instanceof Error ? error.message : "Gagal menyimpan jadwal mingguan.", "error");
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  specialScheduleForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+    hideMessage(scheduleMessage);
+    if (specialStart.value >= specialEnd.value) {
+      showMessage(scheduleMessage, "Jam selesai harus lebih akhir daripada jam mulai.", "error");
+      return;
+    }
+    const button = document.getElementById("saveSpecialScheduleButton");
+    button.disabled = true;
+    try {
+      await scheduleRequest("save_special", {
+        attendance_date: specialDate.value,
+        session: specialSession.value,
+        start_time: specialStart.value,
+        end_time: specialEnd.value,
+        reason: specialReason.value.trim()
+      });
+      showMessage(scheduleMessage, "Jadwal Pulang khusus berhasil disimpan.", "success");
+      specialScheduleForm.reset();
+      await loadScheduleSettings();
+    } catch (error) {
+      showMessage(scheduleMessage, error instanceof Error ? error.message : "Gagal menyimpan jadwal khusus.", "error");
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  openScheduleButton?.addEventListener("click", showSchedule);
+  backFromScheduleButton?.addEventListener("click", showRecap);
+  specialDate.value = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Makassar", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+
+  correctionDate.value = new Intl.DateTimeFormat("en-CA", {
         timeZone: "Asia/Makassar",
         year: "numeric",
         month: "2-digit",
