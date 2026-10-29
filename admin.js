@@ -420,7 +420,7 @@
       button.addEventListener("click", async () => {
         if (!window.confirm(`Hapus jadwal khusus ${row.attendance_date}, sesi ${row.session}? Jadwal mingguan akan berlaku kembali.`)) return;
         try {
-          await scheduleRequest("delete_special", { id: row.id });
+          await scheduleRequest("delete_special", { ids: row.ids || [row.id] });
           showMessage(scheduleMessage, "Jadwal khusus dihapus. Jadwal mingguan akan berlaku kembali.", "success");
           await loadScheduleSettings();
         } catch (error) {
@@ -485,7 +485,7 @@
         end_time: specialEnd.value,
         reason: specialReason.value.trim()
       });
-      showMessage(scheduleMessage, "Jadwal Pulang khusus berhasil disimpan.", "success");
+      showMessage(scheduleMessage, specialSession.value === "Semua" ? "Jadwal Pulang khusus berhasil disimpan untuk sesi pagi dan siang." : "Jadwal Pulang khusus berhasil disimpan.", "success");
       specialScheduleForm.reset();
       await loadScheduleSettings();
     } catch (error) {
@@ -614,7 +614,7 @@
       button.addEventListener("click", async () => {
         if (!window.confirm(`Hapus jadwal khusus ${row.attendance_date}, sesi ${row.session}? Jadwal mingguan akan berlaku kembali.`)) return;
         try {
-          await scheduleRequest("delete_special", { id: row.id });
+          await scheduleRequest("delete_special", { ids: row.ids || [row.id] });
           showMessage(scheduleMessage, "Jadwal khusus dihapus. Jadwal mingguan akan berlaku kembali.", "success");
           await loadScheduleSettings();
         } catch (error) {
@@ -679,7 +679,7 @@
         end_time: specialEnd.value,
         reason: specialReason.value.trim()
       });
-      showMessage(scheduleMessage, "Jadwal Pulang khusus berhasil disimpan.", "success");
+      showMessage(scheduleMessage, specialSession.value === "Semua" ? "Jadwal Pulang khusus berhasil disimpan untuk sesi pagi dan siang." : "Jadwal Pulang khusus berhasil disimpan.", "success");
       specialScheduleForm.reset();
       await loadScheduleSettings();
     } catch (error) {
