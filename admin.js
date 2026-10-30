@@ -42,6 +42,7 @@
   const specialScheduleForm = document.getElementById("specialScheduleForm");
   const specialDate = document.getElementById("specialDate");
   const specialSession = document.getElementById("specialSession");
+  const specialAttendanceType = document.getElementById("specialAttendanceType");
   const specialStart = document.getElementById("specialStart");
   const specialEnd = document.getElementById("specialEnd");
   const specialReason = document.getElementById("specialReason");
@@ -401,7 +402,7 @@
     if (!rows.length) {
       const tr = document.createElement("tr");
       const td = createCell("Belum ada jadwal khusus.");
-      td.colSpan = 5;
+      td.colSpan = 6;
       tr.appendChild(td);
       specialScheduleRows.appendChild(tr);
       return;
@@ -410,6 +411,7 @@
       const tr = document.createElement("tr");
       tr.appendChild(createCell(row.attendance_date));
       tr.appendChild(createCell(row.session));
+      tr.appendChild(createCell(row.attendance_type));
       tr.appendChild(createCell(`${String(row.start_time).slice(0,5)}–${String(row.end_time).slice(0,5)}`));
       tr.appendChild(createCell(row.reason || "-"));
       const td = document.createElement("td");
@@ -481,11 +483,12 @@
       await scheduleRequest("save_special", {
         attendance_date: specialDate.value,
         session: specialSession.value,
+        attendance_type: specialAttendanceType.value,
         start_time: specialStart.value,
         end_time: specialEnd.value,
         reason: specialReason.value.trim()
       });
-      showMessage(scheduleMessage, specialSession.value === "Semua" ? "Jadwal Pulang khusus berhasil disimpan untuk sesi pagi dan siang." : "Jadwal Pulang khusus berhasil disimpan.", "success");
+      showMessage(scheduleMessage, `Jadwal ${specialAttendanceType.value} khusus berhasil disimpan${specialSession.value === "Semua" ? " untuk sesi pagi dan siang" : ""}.`, "success");
       specialScheduleForm.reset();
       await loadScheduleSettings();
     } catch (error) {
@@ -595,7 +598,7 @@
     if (!rows.length) {
       const tr = document.createElement("tr");
       const td = createCell("Belum ada jadwal khusus.");
-      td.colSpan = 5;
+      td.colSpan = 6;
       tr.appendChild(td);
       specialScheduleRows.appendChild(tr);
       return;
@@ -604,6 +607,7 @@
       const tr = document.createElement("tr");
       tr.appendChild(createCell(row.attendance_date));
       tr.appendChild(createCell(row.session));
+      tr.appendChild(createCell(row.attendance_type));
       tr.appendChild(createCell(`${String(row.start_time).slice(0,5)}–${String(row.end_time).slice(0,5)}`));
       tr.appendChild(createCell(row.reason || "-"));
       const td = document.createElement("td");
@@ -675,11 +679,12 @@
       await scheduleRequest("save_special", {
         attendance_date: specialDate.value,
         session: specialSession.value,
+        attendance_type: specialAttendanceType.value,
         start_time: specialStart.value,
         end_time: specialEnd.value,
         reason: specialReason.value.trim()
       });
-      showMessage(scheduleMessage, specialSession.value === "Semua" ? "Jadwal Pulang khusus berhasil disimpan untuk sesi pagi dan siang." : "Jadwal Pulang khusus berhasil disimpan.", "success");
+      showMessage(scheduleMessage, `Jadwal ${specialAttendanceType.value} khusus berhasil disimpan${specialSession.value === "Semua" ? " untuk sesi pagi dan siang" : ""}.`, "success");
       specialScheduleForm.reset();
       await loadScheduleSettings();
     } catch (error) {
