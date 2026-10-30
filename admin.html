@@ -160,22 +160,23 @@
       </form>
 
       <hr>
-      <h3>Jadwal Pulang khusus</h3>
-      <p>Jadwal ini menggantikan jam Pulang reguler untuk tanggal dan sesi yang dipilih. Pilih Semua Sesi jika jadwal berlaku untuk mahasiswa sesi pagi dan siang.</p>
+      <h3>Jadwal Absensi Khusus</h3>
+      <p>Jadwal ini menggantikan jadwal reguler untuk jenis absensi, tanggal, dan sesi yang dipilih. Pilih Semua Sesi jika berlaku untuk mahasiswa sesi pagi dan siang.</p>
       <form id="specialScheduleForm" class="admin-form">
         <div class="correction-fields">
           <div><label for="specialDate">Tanggal</label><input id="specialDate" type="date" required></div>
           <div><label for="specialSession">Sesi</label><select id="specialSession" required><option value="Pagi">Pagi</option><option value="Siang">Siang</option><option value="Semua">Semua Sesi (Pagi + Siang)</option></select></div>
-          <div><label for="specialStart">Jam mulai Pulang</label><input id="specialStart" type="time" required></div>
-          <div><label for="specialEnd">Jam selesai Pulang</label><input id="specialEnd" type="time" required></div>
+          <div><label for="specialAttendanceType">Jenis Absensi</label><select id="specialAttendanceType" required><option value="Datang">Datang</option><option value="Pulang">Pulang</option></select></div>
+          <div><label for="specialStart">Jam mulai</label><input id="specialStart" type="time" required></div>
+          <div><label for="specialEnd">Jam selesai</label><input id="specialEnd" type="time" required></div>
         </div>
         <div><label for="specialReason">Keterangan</label><input id="specialReason" maxlength="200" placeholder="Contoh: kegiatan khusus sekolah" required></div>
         <div class="admin-actions"><button id="saveSpecialScheduleButton" class="admin-button" type="submit">Simpan Jadwal Khusus</button></div>
       </form>
       <div class="table-wrap">
         <table class="attendance-table">
-          <thead><tr><th>Tanggal</th><th>Sesi</th><th>Jam Pulang</th><th>Keterangan</th><th>Aksi</th></tr></thead>
-          <tbody id="specialScheduleRows"><tr><td colspan="5">Memuat jadwal khusus...</td></tr></tbody>
+          <thead><tr><th>Tanggal</th><th>Sesi</th><th>Jenis</th><th>Rentang Jam</th><th>Keterangan</th><th>Aksi</th></tr></thead>
+          <tbody id="specialScheduleRows"><tr><td colspan="6">Memuat jadwal khusus...</td></tr></tbody>
         </table>
       </div>
     </section>
